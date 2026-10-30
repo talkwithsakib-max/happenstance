@@ -1,0 +1,423 @@
+---
+import { Image } from 'astro:assets';
+import SectionHeading from './SectionHeading.astro';
+import SendButton from './SendButton.astro';
+import FaqAnswer from './FaqAnswer.astro';
+import { faqGroups, allQuestions, initialQuestion } from '../data/faq';
+
+import you from '../assets/faq/you.png';
+import flower from '../assets/icons/flower.svg?url';
+import arrow from '../assets/faq/arrow-blue.svg?url';
+
+const total = String(allQuestions.length).padStart(2, '0');
+const pad = (n: number) => String(n).padStart(2, '0');
+---
+
+<section class="faq container" aria-labelledby="faq-title">
+  <SectionHeading id="faq-title" leadWidth={540}>
+    <span class="muted">Questions?</span> Just ask.
+    <Fragment slot="lead">
+      Everything people ask before their first search, answered the way Happenstance answers everything: in plain
+      English.
+    </Fragment>
+  </SectionHeading>
+
+  <div class="layout" data-faq data-active={initialQuestion}>
+    <div class="questions">
+      {
+        faqGroups.map((group) => (
+          <div class="group">
+            <p class="group-label">{group.label}</p>
+            <ul>
+              {group.questions.map((q) => (
+                <li class:list={['item', { 'is-active': q.number === initialQuestion }]} data-item={q.number}>
+                  {q.answer ? (
+                    <button
+                      class="q"
+                      type="button"
+                      data-ask={q.number}
+                      aria-expanded={q.number === initialQuestion ? 'true' : 'false'}
+                      aria-controls={`faq-inline-${q.number}`}
+                    >
+                      <span class="num">{pad(q.number)}</span>
+                      <span class="label display">{q.question}</span>
+                      <img class="arrow" src={arrow} alt="" width="16" height="16" />
+                    </button>
+                  ) : (
+                    <p class="q">
+                      <span class="num">{pad(q.number)}</span>
+                      <span class="label display">{q.question}</span>
+                    </p>
+                  )}
+                  {q.answer && (
+                    <div class="inline" id={`faq-inline-${q.number}`} role="region" aria-label={q.question}>
+                      <div class="inline-inner">
+                        <FaqAnswer answer={q.answer} />
+                      </div>
+                    </div>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+      <p class="contact">Can’t find it? <span class="contact-link">Contact us</span></p>
+    </div>
+
+    <div class="card" aria-live="polite">
+      <div class="card-head">
+        <span class="mark"><img src={flower} alt="" width="14" height="14" /></span>
+        <p class="card-title display">Ask Happenstance</p>
+        <p class="card-count"><span data-count>{pad(initialQuestion)}</span> / {total}</p>
+      </div>
+
+      {
+        allQuestions
+          .filter((q) => q.answer)
+          .map((q) => (
+            <div class="thread" data-thread={q.number} hidden={q.number !== initialQuestion}>
+              <div class="you">
+                <p class="bubble">{q.question}</p>
+                <Image src={you} alt="" width={32} height={32} densities={[1, 2]} class="you-photo" />
+              </div>
+              <div class="answer">
+                <span class="mark"><img src={flower} alt="" width="14" height="14" /></span>
+                <FaqAnswer answer={q.answer!} />
+              </div>
+            </div>
+          ))
+      }
+
+      <div class="ask" aria-hidden="true">
+        <span>Ask anything about Happenstance…</span>
+        <SendButton label="Ask" />
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-faq]').forEach((root) => {
+    const items = [...root.querySelectorAll<HTMLElement>('[data-item]')];
+    const threads = [...root.querySelectorAll<HTMLElement>('[data-thread]')];
+    const count = root.querySelector<HTMLElement>('[data-count]')!;
+    const mobile = window.matchMedia('(max-width: 1023px)');
+    let active: number | null = Number(root.dataset.active);
+
+    const render = () => {
+      items.forEach((item) => {
+        const number = Number(item.dataset.item);
+        const on = number === active;
+        item.classList.toggle('is-active', on);
+        item.querySelector('button.q')?.setAttribute('aria-expanded', String(on));
+      });
+      threads.forEach((thread) => (thread.hidden = Number(thread.dataset.thread) !== active));
+      if (active !== null) count.textContent = String(active).padStart(2, '0');
+    };
+
+    root.addEventListener('click', (event) => {
+      const target = (event.target as HTMLElement).closest<HTMLElement>('[data-ask]');
+      if (!target) return;
+      const number = Number(target.dataset.ask);
+      // On small screens the list is an accordion, so a second tap closes the item.
+      active = mobile.matches && active === number ? null : number;
+      render();
+    });
+
+    // Leaving the accordion layout with nothing open would leave the card empty.
+    mobile.addEventListener('change', () => {
+      if (!mobile.matches && active === null) {
+        active = Number(threads[0]?.dataset.thread);
+        render();
+      }
+    });
+  });
+</script>
+
+<style>
+  .faq {
+    display: flex;
+    flex-direction: column;
+    gap: 56px;
+    padding-block: var(--section-y);
+  }
+
+  .layout {
+    display: flex;
+    align-items: flex-start;
+    gap: 24px;
+  }
+
+  .questions {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    flex-direction: column;
+    gap: 28px;
+    padding-right: 64px;
+  }
+
+  .group ul {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .group-label {
+    padding: 0 14px 6px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+  }
+
+  .item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .q {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 11px 12px 11px 14px;
+    border-radius: var(--r-md);
+    text-align: left;
+    transition: background-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+  }
+
+  .num {
+    flex-shrink: 0;
+    width: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+  }
+
+  .label {
+    flex: 1;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-body);
+    transition: color var(--dur) var(--ease);
+  }
+
+  .arrow {
+    display: none;
+    transition: transform var(--dur) var(--ease);
+  }
+
+  button.q:hover {
+    background: rgba(255, 255, 255, 0.6);
+  }
+
+  button.q:hover .label {
+    color: var(--text-primary);
+  }
+
+  .item.is-active .q {
+    width: auto;
+    height: 40px;
+    padding: 12px;
+    background: var(--surface);
+    filter: drop-shadow(0 2px 2px rgba(36, 55, 85, 0.07));
+  }
+
+  .item.is-active .num {
+    color: var(--blue-600);
+  }
+
+  .item.is-active .label {
+    flex: none;
+    color: var(--text-primary);
+  }
+
+  .item.is-active .arrow {
+    display: block;
+  }
+
+  .inline {
+    display: none;
+  }
+
+  .contact {
+    padding-inline: 14px;
+    font-size: 15px;
+    color: var(--text-body);
+  }
+
+  .contact-link {
+    font-weight: 500;
+    color: var(--text-primary);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  /* Answer card */
+  .card {
+    display: flex;
+    flex: 0 0 690px;
+    flex-direction: column;
+    gap: 24px;
+    padding: 20px 28px 28px;
+    border-radius: var(--r-xl);
+    background: var(--surface);
+    filter: drop-shadow(0 24px 24px rgba(51, 46, 115, 0.14));
+  }
+
+  .card-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border-soft);
+  }
+
+  .mark {
+    display: grid;
+    flex-shrink: 0;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border-radius: var(--r-sm);
+    background: #fafafa;
+    box-shadow: var(--shadow-mark), var(--shadow-mark-inset);
+  }
+
+  .card-title {
+    flex: 1;
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .card-count {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+  }
+
+  .thread {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    animation: enter 400ms var(--ease) both;
+  }
+
+  .thread[hidden] {
+    display: none;
+  }
+
+  @keyframes enter {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+  }
+
+  .you {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+
+  .bubble {
+    padding: 10px 16px;
+    border-radius: var(--r-md);
+    background: var(--text-primary);
+    font-size: 15px;
+    font-weight: 500;
+    color: #fff;
+  }
+
+  .you-photo {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+  }
+
+  .answer {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .answer > :global(.reply) {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .ask {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 8px 8px 16px;
+    border-radius: var(--r-md);
+    background: var(--bg-soft);
+    font-size: 15px;
+    color: var(--text-placeholder);
+  }
+
+  .ask span {
+    flex: 1;
+  }
+
+  /* Accordion on smaller screens */
+  @media (max-width: 1023px) {
+    .layout {
+      flex-direction: column;
+    }
+
+    .questions {
+      width: 100%;
+      padding-right: 0;
+    }
+
+    .card {
+      display: none;
+    }
+
+    .item {
+      align-items: stretch;
+    }
+
+    .item.is-active .q {
+      width: 100%;
+    }
+
+    .item.is-active .label {
+      flex: 1;
+    }
+
+    button.q .arrow {
+      display: block;
+      opacity: 0.45;
+    }
+
+    .item.is-active .arrow {
+      opacity: 1;
+      transform: rotate(90deg);
+    }
+
+    .inline {
+      display: grid;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows 350ms var(--ease);
+    }
+
+    .item.is-active .inline {
+      grid-template-rows: 1fr;
+    }
+
+    .inline-inner {
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .item.is-active .inline-inner {
+      padding: 12px 4px 8px;
+    }
+  }
+</style>

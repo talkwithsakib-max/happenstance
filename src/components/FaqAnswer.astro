@@ -1,0 +1,197 @@
+---
+import { Image } from 'astro:assets';
+import type { Answer } from '../data/faq';
+import { allQuestions } from '../data/faq';
+import search from '../assets/icons/search.svg?url';
+
+interface Props {
+  answer: Answer;
+}
+
+const { answer } = Astro.props;
+const answered = new Set(allQuestions.filter((q) => q.answer).map((q) => q.number));
+---
+
+<div class="reply">
+  <p class="text">{answer.text}</p>
+
+  {
+    answer.example && (
+      <div class="example">
+        <p class="query">
+          <img src={search} alt="" width="16" height="16" />
+          {answer.example.query}
+        </p>
+        {answer.example.results.map((r) => (
+          <div class="person">
+            <Image src={r.photo} alt="" width={40} height={40} densities={[1, 2]} class="person-photo" loading="lazy" />
+            <div class="person-info">
+              <p class="person-name display">{r.name}</p>
+              <p class="person-detail">{r.detail}</p>
+            </div>
+            <span class="via">
+              <Image src={r.viaPhoto} alt="" width={20} height={20} densities={[1, 2]} loading="lazy" />
+              {r.via}
+            </span>
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  {
+    answer.askNext && (
+      <div class="next">
+        <p class="next-label">Ask next</p>
+        <div class="chips">
+          {answer.askNext.map((n) => {
+            const q = allQuestions.find((item) => item.number === n)!;
+            return answered.has(n) ? (
+              <button class="chip" type="button" data-ask={n}>
+                {q.question}
+              </button>
+            ) : (
+              <span class="chip">{q.question}</span>
+            );
+          })}
+        </div>
+      </div>
+    )
+  }
+</div>
+
+<style>
+  .reply {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .text {
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--text-reply);
+  }
+
+  .example {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 14px;
+    border-radius: var(--r-sm);
+    background: var(--bg-soft);
+  }
+
+  .query {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 18px 10px 14px;
+    border-radius: var(--r-md);
+    background: var(--surface);
+    filter: drop-shadow(0 1px 0.5px rgba(97, 97, 97, 0.1));
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-strong);
+  }
+
+  .person {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    height: 56px;
+    padding: 12px;
+    border-radius: var(--r-md);
+    background: var(--surface);
+    filter: drop-shadow(0 2px 2px rgba(36, 55, 85, 0.07));
+  }
+
+  .person-photo {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+  }
+
+  .person-info {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .person-name {
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .person-detail {
+    font-size: 12px;
+    color: var(--text-faint);
+  }
+
+  .via {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px 3px 4px;
+    border-radius: var(--r-xs);
+    background: var(--bg-subtle);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-strong);
+    white-space: nowrap;
+  }
+
+  .via img {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+  }
+
+  .next {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .next-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+  }
+
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    height: 30px;
+    padding: 0 12px;
+    border-radius: var(--r-md);
+    background: var(--bg-soft);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+
+  button.chip {
+    transition: background-color var(--dur) var(--ease);
+  }
+
+  button.chip:hover {
+    background: var(--divider);
+  }
+
+  @media (max-width: 767px) {
+    .text {
+      font-size: 15px;
+    }
+  }
+</style>

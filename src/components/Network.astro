@@ -1,0 +1,436 @@
+---
+import { Image } from 'astro:assets';
+import SectionHeading from './SectionHeading.astro';
+
+import step1 from '../assets/network/step-1.png';
+import step2 from '../assets/network/step-2.png';
+import step3 from '../assets/network/step-3.png';
+import step4 from '../assets/network/step-4.png';
+
+const steps = [
+  {
+    title: 'Connect your accounts',
+    short: 'Gmail, Calendar, LinkedIn, X, and more.',
+    long: 'Gmail, Calendar, LinkedIn, X, and more. Happenstance reads who you’ve emailed, met and followed, so nobody you know gets left out.',
+    image: step1,
+    alt: 'Gmail, Calendar, X, LinkedIn and Outlook connect to your profile, adding thousands of people',
+  },
+  {
+    title: 'Happenstance maps your network',
+    short: 'Ranked by how well you know each person.',
+    long: 'Everyone you know is grouped by team, company and community, then ranked by how well you actually know them, wherever they are in the world.',
+    image: step2,
+    alt: 'A world map of 178,683 connections grouped into communities and ranked by closeness',
+  },
+  {
+    title: 'Add friends, join groups',
+    short: 'Search your networks’ networks.',
+    long: 'Invite friends and join groups like your alumni network or YC batch. Their connections become searchable too, so you can find people two hops away.',
+    image: step3,
+    alt: 'Your friends and groups expand your reach to 18.4k second-degree connections',
+  },
+  {
+    title: 'Search for anyone',
+    short: 'Every result comes with a warm path in.',
+    long: 'Describe who you need in plain English. Every result shows the warmest path in, through someone you already know.',
+    image: step4,
+    alt: 'Searching “Top robotics founders in SF who are hiring” finds Leo Martins via Rahul Mehta',
+  },
+];
+---
+
+<section class="network container" aria-labelledby="network-title">
+  <SectionHeading id="network-title">
+    Your network is bigger<br /><span class="muted">than you think</span>
+    <Fragment slot="lead">
+      Connect your accounts, add friends, join groups. Every signal of who knows who becomes one searchable map.
+    </Fragment>
+  </SectionHeading>
+
+  <div class="showcase" data-showcase data-interval="6000">
+    <ol class="steps">
+      {
+        steps.map((step, i) => (
+          <li class:list={['step', { 'is-active': i === 0 }]} data-step={i}>
+            {i === 0 && (
+              <div class="controls" data-controls>
+                <div class="progress" role="group" aria-label="Steps">
+                  {steps.map((s, j) => (
+                    <button
+                      class:list={['indicator', { 'is-active': j === 0 }]}
+                      type="button"
+                      data-goto={j}
+                      aria-label={`Step ${j + 1}: ${s.title}`}
+                      aria-current={j === 0 ? 'step' : undefined}
+                    >
+                      <span class="fill" />
+                    </button>
+                  ))}
+                </div>
+                <button class="pause" type="button" data-pause aria-label="Pause autoplay" aria-pressed="false">
+                  <span class="icon-pause" aria-hidden="true">
+                    <i />
+                    <i />
+                  </span>
+                  <span class="icon-play" aria-hidden="true" />
+                </button>
+              </div>
+            )}
+            <p class="count" aria-hidden="true">
+              {String(i + 1).padStart(2, '0')} / {String(steps.length).padStart(2, '0')}
+            </p>
+            <h3>
+              <button class="title" type="button" data-goto={i}>
+                {step.title}
+              </button>
+            </h3>
+            <p class="desc desc-long">{step.long}</p>
+            <p class="desc desc-short">{step.short}</p>
+          </li>
+        ))
+      }
+    </ol>
+
+    <div class="visual">
+      {
+        steps.map((step, i) => (
+          <Image
+            class:list={['frame', { 'is-active': i === 0, contain: i > 0 }]}
+            src={step.image}
+            alt={step.alt}
+            data-frame={i}
+            widths={i === 0 ? [650, 1300] : [555, 1109]}
+            sizes={i === 0 ? '(max-width: 1100px) 100vw, 650px' : '(max-width: 1100px) 100vw, 555px'}
+            loading="lazy"
+          />
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-showcase]').forEach((root) => {
+    const steps = [...root.querySelectorAll<HTMLElement>('.step')];
+    const frames = [...root.querySelectorAll<HTMLElement>('[data-frame]')];
+    const controls = root.querySelector<HTMLElement>('[data-controls]')!;
+    const indicators = [...controls.querySelectorAll<HTMLButtonElement>('.indicator')];
+    const pauseBtn = controls.querySelector<HTMLButtonElement>('[data-pause]')!;
+    const interval = Number(root.dataset.interval) || 6000;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    let current = 0;
+    let paused = reduceMotion;
+    root.style.setProperty('--step-duration', `${interval}ms`);
+
+    const restartFill = () => {
+      const fill = indicators[current].querySelector<HTMLElement>('.fill')!;
+      fill.style.animation = 'none';
+      void fill.offsetWidth; // restart the CSS animation
+      fill.style.animation = '';
+    };
+
+    const go = (index: number) => {
+      current = (index + steps.length) % steps.length;
+      steps.forEach((step, i) => step.classList.toggle('is-active', i === current));
+      frames.forEach((frame, i) => frame.classList.toggle('is-active', i === current));
+      indicators.forEach((ind, i) => {
+        ind.classList.toggle('is-active', i === current);
+        if (i === current) ind.setAttribute('aria-current', 'step');
+        else ind.removeAttribute('aria-current');
+      });
+      steps[current].prepend(controls);
+      restartFill();
+    };
+
+    const setPaused = (value: boolean) => {
+      paused = value;
+      root.classList.toggle('is-paused', paused);
+      pauseBtn.setAttribute('aria-pressed', String(paused));
+      pauseBtn.setAttribute('aria-label', paused ? 'Resume autoplay' : 'Pause autoplay');
+    };
+
+    root.addEventListener('click', (event) => {
+      const target = (event.target as HTMLElement).closest<HTMLElement>('[data-goto]');
+      if (!target) return;
+      go(Number(target.dataset.goto));
+    });
+
+    indicators.forEach((ind) =>
+      ind.querySelector('.fill')!.addEventListener('animationend', () => {
+        if (!paused) go(current + 1);
+      }),
+    );
+
+    pauseBtn.addEventListener('click', () => setPaused(!paused));
+
+    // Only run the timer while the showcase is on screen.
+    new IntersectionObserver(([entry]) => root.classList.toggle('is-offscreen', !entry.isIntersecting)).observe(root);
+
+    setPaused(paused);
+  });
+</script>
+
+<style>
+  .network {
+    display: flex;
+    flex-direction: column;
+    gap: 56px;
+    padding-block: var(--section-y);
+  }
+
+  .showcase {
+    display: flex;
+    gap: 24px;
+    min-height: 560px;
+  }
+
+  .steps {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    flex-direction: column;
+    gap: 32px;
+    padding: 4px 8px 4px 28px;
+  }
+
+  .step {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .step.is-active {
+    gap: 14px;
+  }
+
+  .count,
+  .desc-long {
+    display: none;
+  }
+
+  .step.is-active .count,
+  .step.is-active .desc-long {
+    display: block;
+    animation: rise 400ms var(--ease) both;
+  }
+
+  .step.is-active .desc-short {
+    display: none;
+  }
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+  }
+
+  .count {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-faint);
+  }
+
+  .title {
+    text-align: left;
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: -0.44px;
+    color: var(--text-faint);
+    transition: color var(--dur) var(--ease);
+  }
+
+  .title:hover {
+    color: var(--text-body);
+  }
+
+  .step.is-active .title {
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--text-primary);
+    cursor: default;
+  }
+
+  .desc {
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--text-disabled);
+  }
+
+  .desc-long {
+    max-width: 490px;
+    line-height: 1.55;
+    color: var(--text-body);
+  }
+
+  /* Progress + pause */
+  .controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-top: 14px;
+  }
+
+  .progress {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 14px;
+    border-radius: var(--r-sm);
+    background: var(--divider);
+  }
+
+  .indicator {
+    position: relative;
+    width: 5px;
+    height: 5px;
+    overflow: hidden;
+    border-radius: 2px;
+    background: #a1a6b0;
+    transition: width 300ms var(--ease), background-color var(--dur) var(--ease);
+  }
+
+  .indicator:not(.is-active):hover {
+    background: var(--text-primary);
+  }
+
+  .indicator::after {
+    content: '';
+    position: absolute;
+    inset: -8px -3px;
+  }
+
+  .indicator.is-active {
+    width: 52px;
+    height: 4px;
+    background: #d5d8de;
+  }
+
+  .fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 0;
+    border-radius: 2px;
+    background: var(--text-primary);
+  }
+
+  .indicator.is-active .fill {
+    animation: fill var(--step-duration, 6s) linear forwards;
+  }
+
+  .is-paused .indicator.is-active .fill,
+  .is-offscreen .indicator.is-active .fill {
+    animation-play-state: paused;
+  }
+
+  @keyframes fill {
+    to {
+      width: 100%;
+    }
+  }
+
+  .pause {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--divider);
+    transition: background-color var(--dur) var(--ease);
+  }
+
+  .pause:hover {
+    background: #d5d8de;
+  }
+
+  .icon-pause {
+    display: flex;
+    gap: 3px;
+  }
+
+  .icon-pause i {
+    width: 2.5px;
+    height: 10px;
+    border-radius: 1px;
+    background: var(--text-primary);
+  }
+
+  .icon-play {
+    display: none;
+    width: 0;
+    height: 0;
+    margin-left: 2px;
+    border-block: 5px solid transparent;
+    border-left: 8px solid var(--text-primary);
+  }
+
+  .is-paused .icon-pause {
+    display: none;
+  }
+
+  .is-paused .icon-play {
+    display: block;
+  }
+
+  /* Visual */
+  .visual {
+    position: relative;
+    flex: 0 0 650px;
+    height: 560px;
+    overflow: hidden;
+    border: 1px solid var(--surface);
+    border-radius: var(--r-xl);
+    background: #fbfbfc;
+    box-shadow: var(--shadow-card);
+  }
+
+  .frame {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transform: scale(1.01);
+    transition: opacity 500ms var(--ease), transform 700ms var(--ease);
+  }
+
+  .frame.contain {
+    object-fit: contain;
+  }
+
+  .frame.is-active {
+    opacity: 1;
+    transform: none;
+  }
+
+  @media (max-width: 1100px) {
+    .showcase {
+      flex-direction: column;
+    }
+
+    .steps {
+      padding-left: 0;
+    }
+
+    .visual {
+      flex: none;
+      width: 100%;
+      height: auto;
+      aspect-ratio: 650 / 560;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .steps {
+      gap: 24px;
+    }
+
+    .title {
+      font-size: 19px;
+    }
+  }
+</style>

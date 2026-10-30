@@ -1,0 +1,706 @@
+---
+import { Image } from 'astro:assets';
+import SendButton from './SendButton.astro';
+import StrengthMeter from './StrengthMeter.astro';
+
+import grain from '../assets/hero/grain.png';
+import etching from '../assets/hero/etching.png';
+import etchingMask from '../assets/hero/etching-mask.svg?url';
+import avatar1 from '../assets/hero/avatar-1.jpg';
+import avatar2 from '../assets/hero/avatar-2.jpg';
+import avatar3 from '../assets/hero/avatar-3.jpg';
+import avatar4 from '../assets/hero/avatar-4.jpg';
+import avatar5 from '../assets/hero/avatar-5.jpg';
+import you from '../assets/hero/you.png';
+import sarah from '../assets/hero/sarah-chen.png';
+import rahul from '../assets/hero/rahul-mehta.png';
+import emma from '../assets/hero/emma-liu.png';
+import gmail from '../assets/icons/gmail-fill.png';
+import calendar from '../assets/icons/calendar.png';
+import linkedin from '../assets/icons/linkedin.svg?url';
+import x from '../assets/icons/x.svg?url';
+import outlook from '../assets/icons/outlook.svg?url';
+import flower from '../assets/icons/flower.svg?url';
+import connectors from '../assets/hero/connectors.svg?url';
+import pulses from '../assets/hero/flow-pulses.svg?url';
+import contactShadow from '../assets/hero/contact-shadow.svg?url';
+import halo from '../assets/hero/halo.svg?url';
+import ring from '../assets/hero/ring.svg?url';
+import plate from '../assets/hero/plate.svg?url';
+
+const avatars = [
+  { src: avatar1, pos: '52% 45%' },
+  { src: avatar2, pos: '45% 30%' },
+  { src: avatar3, pos: '50% 30%' },
+  { src: avatar4, pos: '50% 45%' },
+  { src: avatar5, pos: '50% 20%' },
+];
+
+const sources = [
+  { name: 'Gmail', raster: gmail, w: 18, h: 13.5 },
+  { name: 'Calendar', raster: calendar, w: 18, h: 18 },
+  { name: 'LinkedIn', svg: linkedin, w: 18, h: 18 },
+  { name: 'Twitter / X', svg: x, w: 18, h: 18 },
+  { name: 'Outlook', svg: outlook, w: 18, h: 17.39 },
+];
+
+const paths = [
+  { name: 'Sarah Chen', role: 'PM at Meta', photo: sarah, initial: 'D', via: 'via Daniel · classmate', tone: 'blue', level: 'strong' },
+  { name: 'Rahul Mehta', role: 'Recruiter at Meta', photo: rahul, initial: 'P', via: 'via Priya · ex-teammate', tone: 'green', level: 'strong' },
+  { name: 'Emma Liu', role: 'Engineer at Meta', photo: emma, initial: 'A', via: 'via Alex · friend', tone: 'amber', level: 'good' },
+] as const;
+---
+
+<section class="hero" aria-labelledby="hero-title">
+  <div class="bg" aria-hidden="true">
+    <div class="grain" style={`background-image:url(${grain.src});opacity:.25`}></div>
+    <div class="etching" style={`mask-image:url("${etchingMask}");-webkit-mask-image:url("${etchingMask}")`}>
+      <Image src={etching} alt="" widths={[1440, 1584]} sizes="100vw" loading="eager" />
+    </div>
+  </div>
+
+  <div class="intro container">
+    <div class="proof">
+      <span class="proof-avatars" aria-hidden="true">
+        {
+          avatars.map((a) => (
+            <span class="proof-avatar">
+              <Image src={a.src} alt="" width={56} height={56} style={`object-position:${a.pos}`} loading="eager" />
+            </span>
+          ))
+        }
+      </span>
+      <span class="proof-text">Loved by <strong>500,000+</strong> professionals</span>
+    </div>
+
+    <h1 id="hero-title">Your next job is already <br class="br" />in your network</h1>
+
+    <p class="lead">
+      Happenstance is an AI search engine for the network you actually have. Describe the job you want and find the
+      people who can refer you.
+    </p>
+
+    <div class="prompt">
+      <p class="prompt-text display">
+        Who do I know at Meta from my school?<span class="caret" aria-hidden="true"></span>
+      </p>
+      <div class="prompt-actions"><SendButton label="Search" /></div>
+    </div>
+  </div>
+
+  <div class="stage">
+    <div class="panel" data-fit="944" role="img" aria-label="Accounts flow into your network map, which ranks warm paths to people at Meta">
+      <img class="layer" src={connectors} alt="" />
+      <img class="layer pulses" src={pulses} alt="" />
+
+      <p class="label label-sources">Connect your accounts</p>
+      <p class="label label-map">Your network map</p>
+      <p class="label label-paths">Warm paths</p>
+
+      <ul class="sources">
+        {
+          sources.map((s) => (
+            <li class="source">
+              <span class="source-icon">
+                {s.raster ? (
+                  <Image src={s.raster} alt="" width={s.w * 2} style={`width:${s.w}px;height:${s.h}px`} />
+                ) : (
+                  <img src={s.svg} alt="" style={`width:${s.w}px;height:${s.h}px`} />
+                )}
+              </span>
+              {s.name}
+            </li>
+          ))
+        }
+      </ul>
+
+      <img class="contact-shadow" src={contactShadow} alt="" />
+      <div class="you">
+        <img class="halo" src={halo} alt="" />
+        <img class="ring" src={ring} alt="" />
+        <img class="plate" src={plate} alt="" />
+        <Image class="you-photo" src={you} alt="" width={104} height={104} densities={[1, 2]} />
+        <span class="you-badge"><img src={flower} alt="" width="20" height="20" /></span>
+      </div>
+      <p class="you-caption">You · 1,284 people mapped</p>
+
+      <ul class="paths">
+        {
+          paths.map((p, i) => (
+            <li class:list={['path', { active: i === 0 }]}>
+              <Image class="path-photo" src={p.photo} alt="" width={40} height={40} densities={[1, 2]} />
+              <div class="path-info">
+                <p class="path-name">{p.name}</p>
+                <p class="path-role">{p.role}</p>
+                <p class="path-via">
+                  <span class:list={['mutual', p.tone]}>{p.initial}</span>
+                  {p.via}
+                </p>
+              </div>
+              <StrengthMeter level={p.level} />
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    /* The header overlaps the hero in Figma; pull the hero up behind it. */
+    margin-top: -64px;
+    padding-top: 125px;
+    padding-bottom: 49px;
+    background: var(--bg-soft);
+    overflow: hidden;
+  }
+
+  .bg {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .etching {
+    position: absolute;
+    top: 175px;
+    left: 50%;
+    width: 1440px;
+    height: 610px;
+    transform: translateX(-50%);
+    opacity: 0.6;
+    mix-blend-mode: multiply;
+    mask-size: 100% 100%;
+    -webkit-mask-size: 100% 100%;
+  }
+
+  .etching img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .intro {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    text-align: center;
+  }
+
+  .proof {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 12px 6px 6px;
+    border-radius: var(--r-md);
+    background: var(--surface);
+    font-size: 14px;
+    color: var(--text-body);
+  }
+
+  .proof-avatars {
+    display: inline-flex;
+  }
+
+  .proof-avatar {
+    width: 28px;
+    height: 28px;
+    margin-right: -8px;
+    border: 2px solid var(--surface);
+    border-radius: var(--r-sm);
+    box-shadow: 0 0 0 1px rgba(36, 55, 85, 0.04);
+    overflow: hidden;
+  }
+
+  .proof-avatar:last-child {
+    margin-right: 0;
+  }
+
+  .proof-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .proof-text strong {
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  h1 {
+    font-size: 56px;
+    font-weight: 500;
+    line-height: 60px;
+    letter-spacing: -1.68px;
+    padding-bottom: 12px;
+  }
+
+  .lead {
+    max-width: 612px;
+    font-size: 17px;
+    line-height: 29.25px;
+    color: var(--text-primary);
+  }
+
+  .prompt {
+    display: flex;
+    flex-direction: column;
+    width: 525px;
+    max-width: 100%;
+    height: 96px;
+    margin-top: 16px;
+    border-radius: var(--r-lg);
+    background: var(--surface);
+    box-shadow: 0 18px 48px -20px rgba(36, 55, 85, 0.3), 0 2px 4px 0 rgba(36, 55, 85, 0.07);
+    text-align: left;
+  }
+
+  .prompt-text {
+    padding: 17px 17px 0;
+    height: 46px;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 20px;
+    letter-spacing: -0.15px;
+  }
+
+  .caret {
+    display: inline-block;
+    width: 1.2px;
+    height: 14.74px;
+    margin-left: 1px;
+    vertical-align: -2px;
+    border-radius: 1px;
+    background: var(--blue-900);
+    animation: blink 1.1s steps(1) infinite;
+  }
+
+  @keyframes blink {
+    50% {
+      opacity: 0;
+    }
+  }
+
+  .prompt-actions {
+    display: flex;
+    justify-content: flex-end;
+    padding: 12px;
+  }
+
+  /* ---- Network visual ---- */
+  .stage {
+    position: relative;
+    width: 1024px;
+    max-width: calc(100% - var(--gutter) * 2 + 80px);
+    margin: -2px auto 0;
+    padding: 40px;
+  }
+
+  .stage::before,
+  .stage::after {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto;
+    height: 640px;
+    pointer-events: none;
+  }
+
+  .stage::before {
+    background: radial-gradient(553px 46px at 50% 474px, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.05) 48%, transparent);
+  }
+
+  .stage::after {
+    background: radial-gradient(471px 30px at 50% 458px, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.11) 42%, transparent);
+  }
+
+  .panel {
+    position: relative;
+    z-index: 1;
+    width: 944px;
+    height: 440px;
+    margin-inline: auto;
+    border-radius: var(--r-xl);
+    background: var(--surface);
+    transform-origin: top left;
+  }
+
+  .layer {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  .pulses {
+    animation: pulse 2.4s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    50% {
+      opacity: 0.45;
+    }
+  }
+
+  .label {
+    position: absolute;
+    top: 36px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: -0.11px;
+    color: var(--text-caption);
+  }
+
+  .label-sources {
+    left: 40px;
+    text-transform: capitalize;
+  }
+
+  .label-map {
+    left: 414px;
+    transform: translateX(-50%);
+  }
+
+  .label-paths {
+    left: 592px;
+  }
+
+  .sources {
+    position: absolute;
+    top: 88px;
+    left: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .source {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 196px;
+    height: 48px;
+    padding: 12px;
+    border-radius: var(--r-md);
+    background: var(--bg-soft);
+    box-shadow: 0 2px 4px 0 rgba(36, 55, 85, 0.07);
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: -0.07px;
+    color: var(--text-ink);
+    transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+  }
+
+  .source:hover {
+    transform: translateX(2px);
+    box-shadow: 0 6px 14px -6px rgba(36, 55, 85, 0.2), 0 2px 4px 0 rgba(36, 55, 85, 0.07);
+  }
+
+  .source-icon {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    margin: -4px 0;
+    border-radius: var(--r-md);
+    background: var(--bg-subtle);
+  }
+
+  .contact-shadow {
+    position: absolute;
+    left: 388px;
+    top: 288px;
+    width: 52px;
+    height: 8px;
+  }
+
+  .you {
+    position: absolute;
+    left: 352px;
+    top: 170px;
+    width: 124px;
+    height: 124px;
+  }
+
+  .halo {
+    position: absolute;
+    left: -32px;
+    top: -32px;
+    width: 188px;
+    height: 188px;
+  }
+
+  .ring {
+    position: absolute;
+    inset: 0;
+    width: 124px;
+    height: 124px;
+  }
+
+  .plate {
+    position: absolute;
+    left: 4px;
+    top: 4px;
+    width: 116px;
+    height: 116px;
+  }
+
+  .you-photo {
+    position: absolute;
+    left: 10px;
+    top: 10px;
+    width: 104px;
+    height: 104px;
+    border-radius: 50%;
+  }
+
+  .you-badge {
+    position: absolute;
+    left: 90px;
+    top: 88px;
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--surface);
+    box-shadow: 0 6px 20px -4px rgba(15, 20, 38, 0.06), 0 1px 2px 0 rgba(15, 20, 38, 0.05);
+  }
+
+  .you-caption {
+    position: absolute;
+    left: 414px;
+    top: 318px;
+    transform: translateX(-50%);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: -0.06px;
+    color: var(--text-body);
+    white-space: nowrap;
+  }
+
+  .paths {
+    position: absolute;
+    left: 592px;
+    top: 90px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+
+  .path {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 312px;
+    height: 76px;
+    padding: 12px 14px 12px 12px;
+    border: 2px solid transparent;
+    border-radius: var(--r-md);
+    background: var(--bg-soft);
+    filter: drop-shadow(0 2px 2px rgba(36, 55, 85, 0.07));
+    transition: transform var(--dur) var(--ease), border-color var(--dur) var(--ease);
+  }
+
+  .path.active {
+    border-color: var(--blue-700);
+    box-shadow: 0 8px 24px -10px rgba(29, 92, 230, 0.35);
+  }
+
+  .path:hover {
+    transform: translateY(-2px);
+  }
+
+  .path-photo {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+  }
+
+  .path-info {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    flex-direction: column;
+    gap: 2px;
+    text-align: left;
+  }
+
+  .path-name {
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .path-role {
+    font-size: 12px;
+    color: var(--text-body);
+  }
+
+  .path-via {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding-top: 2px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-strong);
+  }
+
+  .mutual {
+    display: grid;
+    place-items: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    font-size: 8px;
+    font-weight: 600;
+  }
+
+  .mutual.blue {
+    background: rgba(28, 56, 234, 0.08);
+    color: var(--blue-900);
+  }
+
+  .mutual.green {
+    background: rgba(21, 128, 61, 0.08);
+    color: var(--green-700);
+  }
+
+  .mutual.amber {
+    background: rgba(180, 83, 9, 0.08);
+    color: var(--amber-700);
+  }
+
+  /* Tablet: keep the composition, scale it to fit. */
+  @media (max-width: 1100px) {
+    .stage {
+      width: 100%;
+      max-width: none;
+      padding: 32px var(--gutter);
+    }
+
+    .panel {
+      zoom: var(--fit, 1);
+    }
+  }
+
+  /* Mobile: reflow the visual into a stacked card. */
+  @media (max-width: 767px) {
+    .hero {
+      padding-top: 104px;
+    }
+
+    h1 {
+      font-size: 38px;
+      line-height: 42px;
+      letter-spacing: -1.1px;
+      padding-bottom: 0;
+    }
+
+    .br {
+      display: none;
+    }
+
+    .lead {
+      font-size: 16px;
+      line-height: 26px;
+    }
+
+    .proof-text {
+      font-size: 13px;
+    }
+
+    .prompt-text {
+      font-size: 13px;
+    }
+  }
+
+  /* Below ~960px the scaled composition gets too small to read; reflow it into a stacked card. */
+  @media (max-width: 959px) {
+    .stage {
+      padding: 24px var(--gutter) 0;
+    }
+
+    .panel {
+      zoom: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      width: 100%;
+      max-width: 560px;
+      height: auto;
+      padding: 24px 16px;
+    }
+
+    .layer,
+    .label-map,
+    .contact-shadow,
+    .stage::before,
+    .stage::after {
+      display: none;
+    }
+
+    .label,
+    .sources,
+    .you,
+    .you-caption,
+    .paths {
+      position: static;
+      transform: none;
+    }
+
+    .sources {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .source {
+      width: auto;
+      font-size: 13px;
+    }
+
+    .label-sources {
+      order: 1;
+    }
+
+    .sources {
+      order: 2;
+    }
+
+    .you {
+      position: relative;
+      left: auto;
+      top: auto;
+      order: 3;
+      align-self: center;
+      margin-top: 24px;
+    }
+
+    .you-caption {
+      order: 4;
+      text-align: center;
+    }
+
+    .label-paths {
+      order: 5;
+      margin-top: 8px;
+    }
+
+    .paths {
+      order: 6;
+    }
+
+    .paths {
+      gap: 12px;
+    }
+
+    .path {
+      width: 100%;
+    }
+  }
+</style>

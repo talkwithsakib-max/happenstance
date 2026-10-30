@@ -1,0 +1,296 @@
+---
+import { Image } from 'astro:assets';
+import SectionHeading from './SectionHeading.astro';
+import FeatureLabel from './FeatureLabel.astro';
+
+import justSay from '../assets/jobs/just-say.png';
+import getReferred from '../assets/jobs/get-referred.png';
+import whoYouKnow from '../assets/jobs/who-you-know.png';
+import interview from '../assets/jobs/interview.png';
+---
+
+<section class="jobs container" aria-labelledby="jobs-title">
+  <SectionHeading id="jobs-title" leadWidth={414}>
+    <span class="muted">How job seekers use</span><br />Happenstance
+    <Fragment slot="lead">
+      A referral beats a hundred applications. Here’s what job seekers use Happenstance for day to day.
+    </Fragment>
+  </SectionHeading>
+
+  <div class="bento">
+    <article class="card card-wide">
+      <div class="copy copy-wide">
+        <FeatureLabel>Natural-language search</FeatureLabel>
+        <h3 class="display">Just say what you’re looking for</h3>
+        <p>
+          You don’t have to spell out your background. Happenstance already knows where you’ve worked and who you know,
+          so even a vague search comes back tailored to you.
+        </p>
+      </div>
+      <div class="visual visual-wide">
+        <Image
+          src={justSay}
+          alt="A search for “Looking for my next job in SF” returns three matching roles, each with warm paths"
+          widths={[700, 1400]}
+          sizes="(max-width: 1023px) 100vw, 700px"
+          loading="lazy"
+        />
+      </div>
+    </article>
+
+    <div class="row">
+      <article class="card card-tall">
+        <div class="copy copy-top">
+          <FeatureLabel>Referrals</FeatureLabel>
+          <h3 class="display">Get referred, not rejected</h3>
+        </div>
+        <div class="visual visual-tall">
+          <Image
+            src={getReferred}
+            alt="Happenstance finds the strongest mutual connection to Omar Faroque and drafts an intro message"
+            widths={[596, 1192]}
+            sizes="(max-width: 1023px) 100vw, 596px"
+            loading="lazy"
+          />
+        </div>
+        <div class="copy copy-bottom">
+          <p>
+            A referral means a person reads your resume instead of a filter. Point it at the team you want, and it finds
+            your warmest path in and drafts the ask.
+          </p>
+        </div>
+      </article>
+
+      <div class="stack">
+        <article class="card card-half">
+          <div class="copy copy-half">
+            <FeatureLabel>Warm intros</FeatureLabel>
+            <h3 class="display">See who you already know at the company</h3>
+            <p>
+              Happenstance searches everyone you’ve emailed, met, and worked alongside, plus your friends’ networks. Old
+              classmates count, and so do the people who never became LinkedIn connections.
+            </p>
+          </div>
+          <div class="visual visual-half">
+            <Image
+              src={whoYouKnow}
+              alt="Search results show Jack Ng and Kevin Wang at Meta, each reachable through a mutual friend"
+              widths={[572, 1144]}
+              sizes="(max-width: 1023px) 100vw, 572px"
+              loading="lazy"
+            />
+          </div>
+        </article>
+
+        <article class="card card-half">
+          <div class="copy copy-half">
+            <FeatureLabel>Interview prep</FeatureLabel>
+            <h3 class="display">Walk into every interview briefed</h3>
+            <p>
+              Happenstance researches the people on your calendar automatically: their background, their work, and who you
+              know in common, before every call.
+            </p>
+          </div>
+          <div class="visual visual-half">
+            <Image
+              src={interview}
+              alt="A briefing card for tomorrow’s interview with Omar Faroque, Staff Software Engineer at Meta"
+              widths={[572, 1144]}
+              sizes="(max-width: 1023px) 100vw, 572px"
+              loading="lazy"
+            />
+          </div>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .jobs {
+    display: flex;
+    flex-direction: column;
+    gap: 56px;
+    padding-block: var(--section-y);
+  }
+
+  .bento {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .card {
+    display: flex;
+    overflow: hidden;
+    border-radius: var(--r-xl);
+    background: var(--surface);
+    box-shadow: var(--shadow-card);
+    padding: 12px;
+    transition: box-shadow 300ms var(--ease), transform 300ms var(--ease);
+  }
+
+  .card:hover {
+    box-shadow: 0 22px 48px -24px rgba(36, 55, 85, 0.38), 0 2px 4px 0 rgba(36, 55, 85, 0.07);
+    transform: translateY(-2px);
+  }
+
+  .card:hover .visual img {
+    transform: scale(1.015);
+  }
+
+  .copy {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  h3 {
+    font-size: 22px;
+    font-weight: 600;
+    line-height: 1.25;
+    letter-spacing: -0.33px;
+  }
+
+  .copy p {
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--text-body);
+  }
+
+  .visual {
+    overflow: hidden;
+    border: 1px solid var(--border-soft);
+    border-radius: var(--r-lg);
+  }
+
+  .visual img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top center;
+    transition: transform 500ms var(--ease);
+  }
+
+  /* Wide card */
+  .card-wide {
+    gap: 12px;
+    height: 400px;
+  }
+
+  .copy-wide {
+    flex: 1;
+    justify-content: flex-end;
+    gap: 14px;
+    padding: 32px;
+  }
+
+  .visual-wide {
+    flex: 0 0 700px;
+    border-radius: var(--r-xl);
+  }
+
+  /* Second row */
+  .row {
+    display: flex;
+    gap: 16px;
+    height: 820px;
+  }
+
+  .card-tall {
+    flex: 1;
+    flex-direction: column;
+  }
+
+  .copy-top {
+    gap: 14px;
+    padding: 28px 28px 24px;
+  }
+
+  .visual-tall {
+    flex: 1;
+    min-height: 0;
+  }
+
+  .visual-tall img {
+    object-position: center;
+  }
+
+  .copy-bottom {
+    padding: 24px 28px 20px;
+  }
+
+  .stack {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .card-half {
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .copy-half {
+    gap: 10px;
+    padding: 24px 24px 20px;
+  }
+
+  .visual-half {
+    flex: 1;
+    min-height: 0;
+  }
+
+  .card-half:last-child .visual-half {
+    border-radius: var(--r-xl);
+  }
+
+  @media (max-width: 1100px) {
+    .card-wide {
+      flex-direction: column;
+      height: auto;
+    }
+
+    .copy-wide {
+      padding: 20px 20px 24px;
+    }
+
+    .visual-wide {
+      flex: none;
+      aspect-ratio: 700 / 376;
+    }
+
+    .row {
+      flex-direction: column;
+      height: auto;
+    }
+
+    .visual-tall {
+      flex: none;
+      aspect-ratio: 596 / 582;
+    }
+
+    .visual-half {
+      flex: none;
+      aspect-ratio: 572 / 187;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .jobs {
+      gap: 40px;
+    }
+
+    h3 {
+      font-size: 20px;
+    }
+
+    .copy-top,
+    .copy-bottom,
+    .copy-half {
+      padding-inline: 12px;
+    }
+  }
+</style>

@@ -1,0 +1,16 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="1700" height="720" viewBox="0 0 1700 720" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect id="Edge fade" width="1700" height="720" fill="url(#paint0_linear_0_1969)"/>
+<defs>
+<linearGradient id="paint0_linear_0_1969" x1="850" y1="0" x2="850" y2="720" gradientUnits="userSpaceOnUse">
+<stop stop-opacity="0"/>
+<stop offset="0.44" stop-opacity="0"/>
+<stop offset="0.52" stop-opacity="0.06"/>
+<stop offset="0.6" stop-opacity="0.16"/>
+<stop offset="0.68" stop-opacity="0.32"/>
+<stop offset="0.76" stop-opacity="0.56"/>
+<stop offset="0.84" stop-opacity="0.82"/>
+<stop offset="0.92"/>
+<stop offset="1"/>
+</linearGradient>
+</defs>
+</svg>

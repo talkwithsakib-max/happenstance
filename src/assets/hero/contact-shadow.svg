@@ -1,0 +1,11 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="52" height="8" viewBox="0 0 52 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+<ellipse id="Contact shadow" cx="26" cy="4" rx="26" ry="4" fill="url(#paint0_radial_0_71)"/>
+<defs>
+<radialGradient id="paint0_radial_0_71" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(26 4) scale(26 4)">
+<stop stop-opacity="0.4"/>
+<stop offset="0.28" stop-opacity="0.28"/>
+<stop offset="0.54" stop-opacity="0.1"/>
+<stop offset="0.76" stop-opacity="0"/>
+</radialGradient>
+</defs>
+</svg>

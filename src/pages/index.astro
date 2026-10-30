@@ -1,0 +1,38 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Hero from '../components/Hero.astro';
+import Logos from '../components/Logos.astro';
+import JobSeekers from '../components/JobSeekers.astro';
+import Network from '../components/Network.astro';
+import AiTools from '../components/AiTools.astro';
+import Testimonials from '../components/Testimonials.astro';
+import Security from '../components/Security.astro';
+import Faq from '../components/Faq.astro';
+import Cta from '../components/Cta.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<Layout
+  title="Happenstance — Your next job is already in your network"
+  description="Happenstance is an AI search engine for the network you actually have. Describe the job you want and find the people who can refer you."
+>
+  <Header />
+  <main>
+    <Hero />
+    <Logos />
+    <JobSeekers />
+    <Network />
+    <AiTools />
+    <Testimonials />
+    <Security />
+    <Faq />
+    <Cta />
+  </main>
+  <Footer />
+</Layout>
+
+<script>
+  import { initFit } from '../scripts/fit';
+  initFit();
+</script>

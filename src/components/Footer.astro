@@ -1,0 +1,369 @@
+---
+import { Image } from 'astro:assets';
+import Logo from './Logo.astro';
+
+import grain from '../assets/footer/grain.png';
+import etching from '../assets/footer/etching.png';
+import etchingMask from '../assets/footer/etching-mask.svg?url';
+import wordmark from '../assets/footer/wordmark.png';
+import soc2 from '../assets/security/soc2.png';
+import dti from '../assets/security/dti.png';
+import linkedin from '../assets/footer/linkedin.svg?url';
+import x from '../assets/footer/x.svg?url';
+
+// Footer destinations are not designed yet, so items render without links.
+const columns = [
+  { title: 'Product', items: ['Search', 'Friends & groups', 'iPhone app', 'Pricing', 'Changelog'] },
+  { title: 'Use cases', items: ['Sales', 'Hiring', 'Job seeking', 'Fundraising', 'Investing'] },
+  { title: 'Developers', items: ['MCP server', 'API', 'CLI', 'Documentation'] },
+  { title: 'Company', items: ['About', 'Careers', 'Security', 'Contact'] },
+];
+---
+
+<footer class="footer">
+  <div class="bg" aria-hidden="true">
+    <div class="grain" style={`background-image:url(${grain.src});opacity:.25`}></div>
+    <div class="etching" style={`--edge-fade:url("${etchingMask}")`}>
+      <Image src={etching} alt="" widths={[1584]} sizes="1700px" loading="lazy" />
+    </div>
+    <div class="wash"></div>
+  </div>
+
+  <div class="container inner">
+    <div class="top">
+      <div class="brand">
+        <Logo />
+        <p class="tagline">Work your network with AI. For sales, hiring, <br />job seeking, fundraising and more.</p>
+        <div class="badges">
+          <a href="https://www.aicpa.org/soc4so" target="_blank" rel="noopener">
+            <Image src={soc2} alt="" width={40} height={40} densities={[1, 2]} loading="lazy" />
+            SOC 2 Compliant
+          </a>
+          <a href="https://dt-reg.org/registry/services/71" target="_blank" rel="noopener">
+            <Image src={dti} alt="" width={40} height={40} densities={[1, 2]} loading="lazy" />
+            DTI Trust Level 2
+          </a>
+        </div>
+      </div>
+
+      <nav class="links" aria-label="Footer">
+        {
+          columns.map((col) => (
+            <div class="column">
+              <p class="column-title">{col.title}</p>
+              <ul>
+                {col.items.map((item) => (
+                  <li>
+                    <span class="link">{item}</span>
+                    {item === 'Careers' && <span class="hiring">We're hiring</span>}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))
+        }
+      </nav>
+    </div>
+
+    <div class="wordmark">
+      <Image src={wordmark} alt="happenstance" widths={[1168, 2336]} sizes="(max-width: 1232px) 95vw, 1168px" loading="lazy" />
+    </div>
+
+    <div class="bottom">
+      <ul class="legal">
+        <li>© 2026 Happenstance, Inc.</li>
+        <li><span class="link">Terms of service</span></li>
+        <li><span class="link">Privacy policy</span></li>
+      </ul>
+      <ul class="social">
+        <li><span class="social-icon" role="img" aria-label="LinkedIn"><img src={linkedin} alt="" width="20" height="20" /></span></li>
+        <li><span class="social-icon" role="img" aria-label="X"><img src={x} alt="" width="20" height="20" /></span></li>
+      </ul>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    position: relative;
+    overflow: hidden;
+    background: var(--bg-soft);
+  }
+
+  .bg {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .etching {
+    position: absolute;
+    left: calc(50% - 970px);
+    top: -95px;
+    width: 1700px;
+    height: 720px;
+    /* Figma clips this 1700px etching at the 1440px frame edges, so its ends are never seen.
+       On wider screens they would show as hard seams; fade them in proportion to the extra width
+       (0px at 1440, up to 240px), leaving the 1440px render identical to Figma. */
+    --side-fade: clamp(0px, 100vw - 1440px, 240px);
+    --side-mask: linear-gradient(
+      90deg,
+      transparent 0,
+      #000 var(--side-fade),
+      #000 calc(100% - var(--side-fade)),
+      transparent 100%
+    );
+    opacity: 0.9;
+    mix-blend-mode: multiply;
+    mask-image: var(--edge-fade), var(--side-mask);
+    -webkit-mask-image: var(--edge-fade), var(--side-mask);
+    mask-size: 100% 100%;
+    -webkit-mask-size: 100% 100%;
+    mask-composite: intersect;
+    -webkit-mask-composite: source-in;
+  }
+
+  .etching img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .wash {
+    position: absolute;
+    left: calc(50% - 793px);
+    top: 492px;
+    width: 760px;
+    height: 170px;
+    background: radial-gradient(380px 85px at 50% 50%, rgba(245, 245, 245, 0.92), rgba(245, 245, 245, 0.7) 45%, rgba(245, 245, 245, 0));
+  }
+
+  .inner {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    padding-top: 80px;
+  }
+
+  .top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 48px;
+  }
+
+  .brand {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+  }
+
+  .tagline {
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--text-body);
+  }
+
+  .badges {
+    display: flex;
+    gap: 20px;
+    padding-top: 8px;
+  }
+
+  .badges a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-label);
+    transition: color var(--dur) var(--ease);
+  }
+
+  .badges a:hover {
+    color: var(--text-primary);
+  }
+
+  .badges img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    transition: transform 300ms var(--ease);
+  }
+
+  .badges a:hover img {
+    transform: rotate(-8deg);
+  }
+
+  .links {
+    display: flex;
+    gap: 72px;
+  }
+
+  .column {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .column ul {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .column li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .column-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+  }
+
+  .link {
+    font-size: 15px;
+    color: var(--text-strong);
+    white-space: nowrap;
+    cursor: default;
+    transition: color var(--dur) var(--ease);
+  }
+
+  .link:hover {
+    color: var(--text-primary);
+  }
+
+  .hiring {
+    padding: 3px 8px;
+    border-radius: var(--r-pill);
+    background: var(--gradient-blue);
+    box-shadow: var(--shadow-blue-inset);
+    font-size: 11px;
+    font-weight: 600;
+    color: #fff;
+    white-space: nowrap;
+  }
+
+  .wordmark {
+    position: relative;
+    height: 209px;
+  }
+
+  .wordmark img {
+    position: absolute;
+    /* Offsets align the export (which includes flower shadows) with the Figma frame. */
+    left: calc(50% + 12px);
+    top: -7px;
+    width: 1168px;
+    height: auto;
+    max-width: none;
+    transform: translateX(-50%);
+    /* The export has an opaque #f5f5f5 backdrop; darken lets the etching show through it. */
+    mix-blend-mode: darken;
+  }
+
+  .bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-block: 32px;
+  }
+
+  .legal {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    font-size: 13px;
+  }
+
+  .legal .link {
+    font-size: 13px;
+    color: var(--text-primary);
+  }
+
+  .legal .link:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .social {
+    display: flex;
+    gap: 12px;
+  }
+
+  .social-icon {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--r-md);
+    background: var(--surface);
+    box-shadow: 0 4px 12px -2px rgba(15, 23, 41, 0.05), 0 1px 2px 0 rgba(15, 23, 41, 0.05);
+    transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+  }
+
+  .social-icon:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px -4px rgba(15, 23, 41, 0.14), 0 1px 2px 0 rgba(15, 23, 41, 0.05);
+  }
+
+  @media (max-width: 1279px) {
+    .wordmark {
+      height: auto;
+      aspect-ratio: 1127 / 160;
+    }
+
+    .wordmark img {
+      top: 0;
+      width: 103.6%;
+    }
+  }
+
+  @media (max-width: 1100px) {
+    .top {
+      flex-direction: column;
+    }
+
+    .links {
+      flex-wrap: wrap;
+      gap: 40px 56px;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .inner {
+      padding-top: 56px;
+    }
+
+    .tagline br {
+      display: none;
+    }
+
+    .badges {
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .links {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px 24px;
+    }
+
+    .bottom {
+      flex-direction: column-reverse;
+      align-items: flex-start;
+      gap: 20px;
+    }
+
+    .legal {
+      flex-wrap: wrap;
+      gap: 8px 20px;
+    }
+  }
+</style>

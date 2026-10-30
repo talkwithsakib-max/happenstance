@@ -1,0 +1,67 @@
+---
+interface Props {
+  level: 'strong' | 'good';
+}
+
+const { level } = Astro.props;
+const label = level === 'strong' ? 'Strong' : 'Good';
+---
+
+<span class:list={['strength', level]}>
+  <span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>
+  {label}
+</span>
+
+<style>
+  .strength {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .bars {
+    display: inline-flex;
+    align-items: flex-end;
+    gap: 2px;
+  }
+
+  .bars i {
+    width: 3px;
+    border-radius: 1.5px;
+  }
+
+  .bars i:nth-child(1) {
+    height: 6px;
+  }
+
+  .bars i:nth-child(2) {
+    height: 9px;
+  }
+
+  .bars i:nth-child(3) {
+    height: 12px;
+  }
+
+  .strong {
+    color: var(--green-700);
+  }
+
+  .strong i {
+    background: var(--green-600);
+  }
+
+  .good {
+    color: var(--amber-700);
+  }
+
+  .good i {
+    background: var(--amber-600);
+  }
+
+  .good i:nth-child(3) {
+    background: var(--divider);
+  }
+</style>

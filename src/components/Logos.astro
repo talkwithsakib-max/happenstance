@@ -1,0 +1,174 @@
+---
+import arrow from '../assets/logos/arrow.svg?url';
+import perplexity from '../assets/logos/perplexity.svg?url';
+import lovable from '../assets/logos/lovable.svg?url';
+import greylock from '../assets/logos/greylock.svg?url';
+import appliedCompute from '../assets/logos/applied-compute.svg?url';
+import cognition from '../assets/logos/cognition.svg?url';
+import thrive from '../assets/logos/thrive.svg?url';
+import yc from '../assets/logos/yc.svg?url';
+import brex from '../assets/logos/brex.svg?url';
+import accel from '../assets/logos/accel.svg?url';
+import angellist from '../assets/logos/angellist.svg?url';
+
+// `story` marks the cells that carry the ↗ corner arrow in Figma.
+const logos = [
+  { name: 'Perplexity', src: perplexity, w: 115.44, h: 26, story: true },
+  { name: 'Lovable', src: lovable, w: 104, h: 23.19 },
+  { name: 'Greylock', src: greylock, w: 112, h: 28, story: true },
+  { name: 'Applied Compute', src: appliedCompute, w: 150, h: 18.14 },
+  { name: 'Cognition', src: cognition, w: 108, h: 23.14, story: true },
+  { name: 'Thrive Capital', src: thrive, w: 130.67, h: 20 },
+  { name: 'Y Combinator', src: yc, w: 110.63, h: 26, story: true },
+  { name: 'Brex', src: brex, w: 61.71, h: 24 },
+  { name: 'Accel', src: accel, w: 94.8, h: 30, story: true },
+  { name: 'AngelList', src: angellist, w: 103.58, h: 24 },
+];
+---
+
+<section class="logos container" aria-labelledby="logos-title">
+  <div class="heading">
+    <h2 id="logos-title">Loved by 500,000+ users and teams <span class="muted">at the world’s best companies.</span></h2>
+    <button class="stories" type="button">Read customer stories <span aria-hidden="true">→</span></button>
+  </div>
+
+  <ul class="grid">
+    {
+      logos.map((logo) => (
+        <li class:list={['cell', { story: logo.story }]}>
+          {logo.story && <img class="arrow" src={arrow} alt="" width="10" height="10" />}
+          <img class="mark" src={logo.src} alt={logo.name} style={`width:${logo.w}px;height:${logo.h}px`} loading="lazy" />
+        </li>
+      ))
+    }
+  </ul>
+</section>
+
+<style>
+  .logos {
+    display: flex;
+    flex-direction: column;
+    gap: 48px;
+    padding-block: 52px;
+  }
+
+  .heading {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+  }
+
+  h2 {
+    max-width: 680px;
+    font-size: 40px;
+    font-weight: 500;
+    line-height: 1.15;
+    letter-spacing: -1.2px;
+  }
+
+  .muted {
+    display: block;
+  }
+
+  .stories {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px 8px 14px;
+    border-radius: var(--r-md);
+    background: var(--surface);
+    box-shadow: var(--shadow-chip);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: -0.065px;
+    color: var(--text-ink);
+    transition: box-shadow var(--dur) var(--ease);
+  }
+
+  .stories span {
+    color: var(--text-faint);
+    transition: transform var(--dur) var(--ease), color var(--dur) var(--ease);
+  }
+
+  .stories:hover {
+    box-shadow: 0 4px 12px -4px rgba(36, 55, 85, 0.2), var(--shadow-chip);
+  }
+
+  .stories:hover span {
+    transform: translateX(2px);
+    color: var(--text-ink);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 1px;
+    overflow: hidden;
+    border-radius: var(--r-lg);
+    background: var(--divider);
+    box-shadow: var(--shadow-card);
+  }
+
+  .cell {
+    position: relative;
+    display: grid;
+    place-items: center;
+    height: 112px;
+    background: var(--surface);
+    transition: background-color var(--dur) var(--ease);
+  }
+
+  .mark {
+    /* Logos keep their Figma size but shrink to fit narrower cells. */
+    max-width: calc(100% - 28px);
+    object-fit: contain;
+    transition: filter var(--dur) var(--ease);
+  }
+
+  .arrow {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    opacity: 0.8;
+    transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease);
+  }
+
+  .cell:hover {
+    background: #fafafa;
+  }
+
+  .cell:hover .mark {
+    filter: brightness(0.6);
+  }
+
+  .cell:hover .arrow {
+    opacity: 1;
+    transform: translate(1px, -1px);
+  }
+
+  @media (max-width: 1023px) {
+    h2 {
+      font-size: 32px;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .cell {
+      height: 88px;
+    }
+
+    .mark {
+      transform: scale(0.85);
+    }
+
+    h2 {
+      font-size: 28px;
+      letter-spacing: -0.8px;
+    }
+  }
+</style>

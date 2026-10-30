@@ -1,0 +1,348 @@
+---
+import { Image } from 'astro:assets';
+import soc2 from '../assets/security/soc2.png';
+import dti from '../assets/security/dti.png';
+import arrow from '../assets/security/arrow.svg?url';
+import glowBlue from '../assets/security/glow-blue.svg?url';
+import glowGreen from '../assets/security/glow-green.svg?url';
+import verified from '../assets/security/verified.svg?url';
+
+const badges = [
+  {
+    href: 'https://www.aicpa.org/soc4so',
+    chip: 'Compliance',
+    tone: 'blue',
+    title: 'SOC 2 compliant',
+    caption: 'Independently audited controls',
+    seal: soc2,
+    sealAlt: 'AICPA SOC 2 seal',
+    glow: glowBlue,
+    lines: [84, 100, 72, 150, 118, 160, 104, 140],
+  },
+  {
+    href: 'https://dt-reg.org/registry/services/71',
+    chip: 'Registry',
+    tone: 'green',
+    title: 'DTI Trust Level 2',
+    caption: 'Listed in the DTI trust registry',
+    seal: dti,
+    sealAlt: 'Data Trust Registry Level 2 accredited seal',
+    glow: glowGreen,
+    checks: [132, 104, 120],
+  },
+];
+---
+
+<section class="security container" aria-labelledby="security-title">
+  <div class="copy">
+    <h2 id="security-title">Private and secure</h2>
+    <p>
+      You control what you share. Your public profile shows a constellation of named people you know by default, which
+      you can turn off anytime, and your data is never used to train AI models.
+    </p>
+    <a class="read" href="https://happenstance.ai/security" target="_blank" rel="noopener"
+      ><span>Read about security</span> →</a
+    >
+  </div>
+
+  <div class="badges">
+    {
+      badges.map((b) => (
+        <a class="badge" href={b.href} target="_blank" rel="noopener">
+          <span class:list={['chip', b.tone]}>{b.chip}</span>
+          <span class="arrow">
+            <img src={arrow} alt="" width="14" height="14" />
+          </span>
+          <span class="title">{b.title}</span>
+          <span class="caption">{b.caption}</span>
+          <span class="art" aria-hidden="true">
+            <img class="glow" src={b.glow} alt="" />
+            <span class="sheet sheet-3" />
+            <span class="sheet sheet-2" />
+            <span class="sheet sheet-1">
+              {b.lines && (
+                <>
+                  <i class="line strong" style={`top:17px;width:${b.lines[0]}px`} />
+                  <i class="line" style={`top:35px;width:${b.lines[1]}px`} />
+                  <i class="line" style={`top:51px;width:${b.lines[2]}px`} />
+                  <i class="line" style={`top:91px;width:${b.lines[3]}px`} />
+                  <i class="line" style={`top:107px;width:${b.lines[4]}px`} />
+                  <i class="line" style={`top:135px;width:${b.lines[5]}px`} />
+                  <i class="line" style={`top:151px;width:${b.lines[6]}px`} />
+                  <i class="line" style={`top:179px;width:${b.lines[7]}px`} />
+                </>
+              )}
+              {b.checks && (
+                <>
+                  <i class="line strong" style="top:17px;width:80px" />
+                  <i class="line" style="top:35px;width:92px" />
+                  {b.checks.map((w, i) => (
+                    <>
+                      <img class="check" src={verified} alt="" style={`top:${90 + i * 28}px`} />
+                      <i class="line" style={`top:${95 + i * 28}px;left:43px;width:${w}px`} />
+                    </>
+                  ))}
+                </>
+              )}
+            </span>
+            <span class="seal">
+              <Image src={b.seal} alt={b.sealAlt} width={96} height={96} densities={[1, 2]} loading="lazy" />
+            </span>
+          </span>
+          <span class="visually-hidden">(opens in a new tab)</span>
+        </a>
+      ))
+    }
+  </div>
+</section>
+
+<style>
+  .security {
+    display: flex;
+    align-items: center;
+    gap: 64px;
+    padding-top: 96px;
+    padding-bottom: 24px;
+  }
+
+  .copy {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+  }
+
+  h2 {
+    font-size: 48px;
+    font-weight: 500;
+    line-height: 1.1;
+    letter-spacing: -1.44px;
+  }
+
+  .copy p {
+    /* The first line measures 552.4px in browsers vs Figma's 552px column; allow it to fit. */
+    margin-right: -2px;
+    font-size: 17px;
+    line-height: 1.5;
+    color: var(--text-body);
+  }
+
+  .read {
+    font-size: 15px;
+    font-weight: 500;
+  }
+
+  .read span {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
+    transition: text-decoration-color var(--dur) var(--ease);
+  }
+
+  .read:hover span {
+    text-decoration-color: var(--blue-400);
+  }
+
+  .badges {
+    display: flex;
+    gap: 24px;
+  }
+
+  .badge {
+    position: relative;
+    display: block;
+    flex-shrink: 0;
+    width: 296px;
+    height: 320px;
+    overflow: hidden;
+    border-radius: var(--r-md);
+    background: var(--surface);
+    box-shadow: var(--shadow-card);
+    transition: transform 300ms var(--ease), box-shadow 300ms var(--ease);
+  }
+
+  .badge:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 24px 48px -24px rgba(36, 55, 85, 0.4), 0 2px 4px 0 rgba(36, 55, 85, 0.07);
+  }
+
+  .chip {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    padding: 4px 10px;
+    border-radius: var(--r-sm);
+    background: var(--bg-soft);
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .chip.blue {
+    color: var(--blue-ink);
+  }
+
+  .chip.green {
+    color: #156b3a;
+  }
+
+  .arrow {
+    position: absolute;
+    top: 18px;
+    left: 244px;
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 16px;
+    transition: background-color var(--dur) var(--ease), transform var(--dur) var(--ease);
+  }
+
+  .badge:hover .arrow {
+    background: var(--bg-soft);
+    transform: translate(1px, -1px);
+  }
+
+  .title {
+    position: absolute;
+    top: 60px;
+    left: 20px;
+    font-size: 22px;
+    font-weight: 500;
+    letter-spacing: -0.44px;
+  }
+
+  .caption {
+    position: absolute;
+    top: 92px;
+    left: 20px;
+    font-size: 13px;
+    color: var(--text-body);
+  }
+
+  .art {
+    position: absolute;
+    top: 136px;
+    left: 0;
+    width: 296px;
+    height: 200px;
+  }
+
+  .glow {
+    position: absolute;
+    left: -68px;
+    top: 22px;
+    width: 256px;
+    height: 256px;
+    max-width: none;
+  }
+
+  .sheet {
+    position: absolute;
+    width: 248px;
+    height: 210px;
+    border: 1px solid rgba(36, 55, 85, 0.09);
+    border-radius: var(--r-sm);
+    background: var(--bg-subtle);
+    transition: transform 400ms var(--ease);
+  }
+
+  .sheet-3 {
+    left: 68px;
+    top: 16px;
+  }
+
+  .sheet-2 {
+    left: 56px;
+    top: 28px;
+  }
+
+  .sheet-1 {
+    left: 44px;
+    top: 40px;
+    overflow: hidden;
+    background: var(--surface);
+    box-shadow: 0 8px 24px -8px rgba(36, 55, 85, 0.1);
+  }
+
+  .badge:hover .sheet-3 {
+    transform: translate(6px, -4px);
+  }
+
+  .badge:hover .sheet-2 {
+    transform: translate(3px, -2px);
+  }
+
+  .line {
+    position: absolute;
+    left: 15px;
+    height: 8px;
+    border-radius: 4px;
+    background: #e3e6eb;
+  }
+
+  .line.strong {
+    background: #cfd6e0;
+  }
+
+  .check {
+    position: absolute;
+    left: 15px;
+    width: 18px;
+    height: 18px;
+  }
+
+  .seal {
+    position: absolute;
+    left: 166px;
+    top: 14px;
+    width: 108px;
+    height: 108px;
+    padding: 5px;
+    border: 1px solid rgba(36, 55, 85, 0.08);
+    border-radius: 54px;
+    background: var(--surface);
+    box-shadow: 0 16px 32px -14px rgba(36, 55, 85, 0.28), 0 2px 4px 0 rgba(36, 55, 85, 0.1);
+    transition: transform 400ms var(--ease);
+  }
+
+  .badge:hover .seal {
+    transform: rotate(-6deg) scale(1.03);
+  }
+
+  .seal img {
+    width: 96px;
+    height: 96px;
+  }
+
+  @media (max-width: 1100px) {
+    .security {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 40px;
+    }
+  }
+
+  @media (max-width: 767px) {
+    h2 {
+      font-size: 34px;
+      letter-spacing: -1px;
+    }
+
+    .copy p {
+      font-size: 16px;
+    }
+
+    .badges {
+      width: 100%;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .badge {
+      width: 100%;
+      max-width: 296px;
+    }
+  }
+</style>

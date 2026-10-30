@@ -1,0 +1,22 @@
+---
+import sparkle from '../assets/icons/sparkle.svg?url';
+---
+
+<p class="feature-label">
+  <img src={sparkle} alt="" width="10" height="10" />
+  <slot />
+</p>
+
+<style>
+  .feature-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 30px;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 19.5px;
+    letter-spacing: -0.065px;
+    color: var(--blue-900);
+  }
+</style>

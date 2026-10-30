@@ -1,0 +1,28 @@
+---
+import flower from '../assets/icons/flower.svg?url';
+---
+
+<span class="logo">
+  <img src={flower} alt="" width="24" height="24" />
+  <span class="logo-name">Happenstance</span>
+</span>
+
+<style>
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .logo img {
+    width: 24px;
+    height: 24px;
+  }
+
+  .logo-name {
+    font-size: 18px;
+    font-weight: 500;
+    line-height: 19.5px;
+    color: var(--text-primary);
+  }
+</style>

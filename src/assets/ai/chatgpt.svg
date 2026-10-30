@@ -1,0 +1,11 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="ChatGPT" clip-path="url(#clip0_0_192)">
+<path id="Vector" d="M8 16C12.4183 16 16 12.4183 16 8C16 3.58172 12.4183 0 8 0C3.58172 0 0 3.58172 0 8C0 12.4183 3.58172 16 8 16Z" fill="#0A0A0A"/>
+<path id="Vector_2" d="M8 4L11.4667 6V10L8 12L4.53333 10V6L8 4Z" stroke-width="1.8" stroke-linejoin="round" stroke="white"/>
+</g>
+<defs>
+<clipPath id="clip0_0_192">
+<rect width="16" height="16" fill="white"/>
+</clipPath>
+</defs>
+</svg>
