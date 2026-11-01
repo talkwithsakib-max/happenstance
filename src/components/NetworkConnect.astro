@@ -146,18 +146,19 @@ const path = (a: number[], b: number[]) => `M${a[0]} ${a[1]}L${b[0]} ${b[1]}`;
 
   .cx-rails path {
     stroke: #fff;
-    stroke-width: 2;
+    stroke-width: 1.5;
+    stroke-dasharray: 2 2;
   }
 
   .cx-signal {
     fill: none;
     stroke: currentColor;
-    stroke-width: 3;
+    stroke-width: 1.5;
     stroke-linecap: round;
     stroke-dasharray: 34 200;
     stroke-dashoffset: 34;
     opacity: 0;
-    filter: drop-shadow(0 0 4px currentColor);
+    filter: drop-shadow(0 0 3px currentColor);
   }
 
   .cx-tile {

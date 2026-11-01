@@ -572,6 +572,7 @@ const spot = (p: { x: number; y: number }, size: number) => `left:${p.x}px;top:$
   /* 03: spokes, warm path to Maya, add-friend button */
   .nv-spoke {
     fill: none;
+    stroke-width: 1.5;
     stroke: #243755;
     stroke-opacity: 0.14;
     stroke-linecap: round;
@@ -580,7 +581,6 @@ const spot = (p: { x: number; y: number }, size: number) => `left:${p.x}px;top:$
   .nv-spoke.is-warm {
     stroke: #3d85f7;
     stroke-opacity: 1;
-    stroke-width: 1.5;
   }
 
   .nv-dashed {
@@ -617,14 +617,14 @@ const spot = (p: { x: number; y: number }, size: number) => `left:${p.x}px;top:$
   .nv-warm {
     fill: none;
     stroke: #3d85f7;
-    stroke-width: 2;
+    stroke-width: 1.5;
     stroke-linecap: round;
   }
 
   .nv-flow {
     fill: none;
     stroke: #8fc0ff;
-    stroke-width: 3;
+    stroke-width: 1.5;
     stroke-linecap: round;
     stroke-dasharray: 10 200;
     stroke-dashoffset: 10;
