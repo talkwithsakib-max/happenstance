@@ -2,7 +2,7 @@ import type { ImageMetadata } from 'astro';
 import adam from '../assets/testimonials/adam-novak.png';
 import olivia from '../assets/testimonials/olivia-moore.png';
 import garry from '../assets/testimonials/garry-tan.png';
-import marc from '../assets/testimonials/marc-hamel.png';
+import marc from '../assets/testimonials/marc-hamel.jpg';
 import yann from '../assets/testimonials/yann-sarfati.png';
 
 export interface Testimonial {
