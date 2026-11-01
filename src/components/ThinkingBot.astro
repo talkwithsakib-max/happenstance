@@ -1,0 +1,77 @@
+---
+// "Thinking" indicator shown while a reply is pending (pattern from x.ai's bot), drawn as the
+// Happenstance flower with eyes. It is invisible by default; motion scripts fade it in and out
+// around a reply, so without JavaScript or with reduced motion it never appears.
+import BotMark from './BotMark.astro';
+
+interface Props {
+  /** light: on white surfaces · pill: on photos/watercolors · dark: inside the terminal */
+  tone?: 'light' | 'pill' | 'dark';
+  class?: string;
+}
+
+const { tone = 'light', class: className } = Astro.props;
+---
+
+<span class:list={['thinking', tone, className]} aria-hidden="true" data-thinking>
+  <BotMark size={tone === 'dark' ? 20 : 28} />
+  <span class="label">Thinking</span>
+</span>
+
+<style>
+  .thinking {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* "Thinking" with a soft light sweep across the letters. */
+  .label {
+    background: linear-gradient(90deg, var(--base) 0%, var(--base) 38%, var(--hi) 50%, var(--base) 62%, var(--base) 100%);
+    background-size: 260% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: bot-shimmer 2.2s linear infinite;
+  }
+
+  @keyframes bot-shimmer {
+    from {
+      background-position: 100% 0;
+    }
+    to {
+      background-position: 0 0;
+    }
+  }
+
+  .light {
+    --base: #8a8f9c;
+    --hi: #282a30;
+  }
+
+  .pill {
+    --base: #6b7180;
+    --hi: #0a0a0a;
+    padding: 4px 12px 4px 4px;
+    border-radius: var(--r-pill);
+    background: rgba(255, 255, 255, 0.86);
+    box-shadow: 0 6px 18px -8px rgba(36, 55, 85, 0.35), 0 1px 2px rgba(36, 55, 85, 0.08);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+  }
+
+  .dark {
+    --base: #94a3b8;
+    --hi: #f1f5f9;
+    gap: 7px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 400;
+  }
+</style>

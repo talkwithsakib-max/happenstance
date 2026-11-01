@@ -13,23 +13,23 @@ const answered = new Set(allQuestions.filter((q) => q.answer).map((q) => q.numbe
 ---
 
 <div class="reply">
-  <p class="text">{answer.text}</p>
+  <p class="text" data-stream>{answer.text}</p>
 
   {
     answer.example && (
-      <div class="example">
-        <p class="query">
+      <div class="example m-hide">
+        <p class="query m-hide">
           <img src={search} alt="" width="16" height="16" />
-          {answer.example.query}
+          <span data-type={answer.example.query}>{answer.example.query}</span>
         </p>
         {answer.example.results.map((r) => (
-          <div class="person">
+          <div class="person m-hide">
             <Image src={r.photo} alt="" width={40} height={40} densities={[1, 2]} class="person-photo" loading="lazy" />
             <div class="person-info">
               <p class="person-name display">{r.name}</p>
               <p class="person-detail">{r.detail}</p>
             </div>
-            <span class="via">
+            <span class="via m-hide">
               <Image src={r.viaPhoto} alt="" width={20} height={20} densities={[1, 2]} loading="lazy" />
               {r.via}
             </span>
@@ -41,17 +41,17 @@ const answered = new Set(allQuestions.filter((q) => q.answer).map((q) => q.numbe
 
   {
     answer.askNext && (
-      <div class="next">
+      <div class="next m-hide">
         <p class="next-label">Ask next</p>
         <div class="chips">
           {answer.askNext.map((n) => {
             const q = allQuestions.find((item) => item.number === n)!;
             return answered.has(n) ? (
-              <button class="chip" type="button" data-ask={n}>
+              <button class="chip m-hide" type="button" data-ask={n}>
                 {q.question}
               </button>
             ) : (
-              <span class="chip">{q.question}</span>
+              <span class="chip m-hide">{q.question}</span>
             );
           })}
         </div>

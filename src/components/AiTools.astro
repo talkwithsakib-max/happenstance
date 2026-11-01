@@ -2,6 +2,7 @@
 import { Image } from 'astro:assets';
 import SectionHeading from './SectionHeading.astro';
 import StrengthMeter from './StrengthMeter.astro';
+import ThinkingBot from './ThinkingBot.astro';
 
 import bgMcp from '../assets/ai/bg-mcp.png';
 import bgApi from '../assets/ai/bg-api.png';
@@ -84,6 +85,7 @@ const worksWith = [
           </button>
         ))
       }
+      <span class="stem" aria-hidden="true"></span>
     </div>
 
     <!-- MCP -->
@@ -111,18 +113,19 @@ const worksWith = [
         <span class="more">Read the docs <img src={arrowRight} alt="" width="16" height="16" /></span>
       </div>
 
-      <div class="visual-wrap"><div class="visual visual-mcp" data-fit="540" aria-hidden="true">
-        <div class="chat">
+      <div class="visual-wrap"><div class="visual visual-mcp" data-fit="540" data-motion data-seq="mcp" aria-hidden="true">
+        <div class="chat m-hide">
           <div class="chat-head">
             <img src={claude} alt="" width="16" height="16" />
             <span class="chat-title">Claude</span>
             <span class="pill"><img src={dotBlue} alt="" width="7" height="7" />Happenstance</span>
           </div>
           <div class="chat-body">
-            <p class="bubble">Who do I know at Bedrock Robotics?</p>
-            <p class="tool"><img src={toolPlug} alt="" width="12" height="12" /><span class="shimmer">Searched 183,450 connections with Happenstance</span></p>
-            <p class="chat-text">Your warmest path in:</p>
-            <div class="warm">
+            <p class="bubble m-hide">Who do I know at Bedrock Robotics?</p>
+            <ThinkingBot class="mcp-think" />
+            <p class="tool m-hide"><img src={toolPlug} alt="" width="12" height="12" /><span class="shimmer">Searched 183,450 connections with Happenstance</span></p>
+            <p class="chat-text" data-stream>Your warmest path in:</p>
+            <div class="warm m-hide">
               <Image src={sarah} alt="" width={40} height={40} densities={[1, 2]} class="warm-photo" />
               <div class="warm-info">
                 <p class="warm-name">Sarah Chen</p>
@@ -130,15 +133,12 @@ const worksWith = [
               </div>
               <StrengthMeter level="strong" />
             </div>
-            <p class="more-paths">+ 2 more warm paths</p>
+            <p class="more-paths m-hide">+ 2 more warm paths</p>
           </div>
         </div>
-        <div class="code code-mcp">
+        <div class="code code-mcp m-hide">
           <p class="code-head">mcp.json</p>
-          <pre><span class="k">"happenstance"</span>: {"{"}
-  <span class="k">"type"</span>: <span class="s">"http"</span>,
-  <span class="k">"url"</span>: <span class="s">".../mcp"</span>
-{"}"}</pre>
+          <pre><span class="ln m-hide"><span class="k">"happenstance"</span>: {"{"}</span><span class="ln m-hide">  <span class="k">"type"</span>: <span class="s">"http"</span>,</span><span class="ln m-hide">  <span class="k">"url"</span>: <span class="s">".../mcp"</span></span><span class="ln m-hide">{"}"}</span></pre>
         </div>
       </div></div>
     </div>
@@ -159,23 +159,15 @@ const worksWith = [
         <span class="more">View API reference <img src={arrowRight} alt="" width="16" height="16" /></span>
       </div>
 
-      <div class="visual-wrap"><div class="visual visual-api" data-fit="540" aria-hidden="true">
-        <div class="code code-request">
+      <div class="visual-wrap"><div class="visual visual-api" data-fit="540" data-motion data-seq="api" aria-hidden="true">
+        <div class="code code-request m-hide">
           <p class="code-head"><span class="method">POST</span><span class="path">/v1/search</span></p>
-          <pre><span class="k">curl</span> https://api.happenstance.ai/v1/search \
-  -H <span class="s">"Authorization: Bearer $HS_API_KEY"</span> \
-  -d '{"{"}<span class="s">"query"</span>: <span class="s">"seed investors in robotics"</span>{"}"}'</pre>
+          <pre><span class="ln m-hide" data-typed-line><span class="k">curl</span> https://api.happenstance.ai/v1/search \</span><span class="ln m-hide" data-typed-line>  -H <span class="s">"Authorization: Bearer $HS_API_KEY"</span> \</span><span class="ln m-hide" data-typed-line>  -d '{"{"}<span class="s">"query"</span>: <span class="s">"seed investors in robotics"</span>{"}"}'</span></pre>
         </div>
-        <div class="code code-response">
-          <p class="code-head"><span class="ok">200 OK</span><span class="ms">142 ms</span></p>
-          <pre>{"{"}
-  <span class="k">"results"</span>: [{"{"}
-    <span class="k">"name"</span>: <span class="s">"Boris Sofman"</span>,
-    <span class="k">"title"</span>: <span class="s">"Co-Founder &amp; CEO"</span>,
-    <span class="k">"path"</span>: <span class="s">"via Alex Teichman"</span>,
-    <span class="k">"strength"</span>: <span class="n">0.92</span>
-  {"}"}]
-{"}"}</pre>
+        <ThinkingBot tone="pill" class="api-think" />
+        <div class="code code-response m-hide">
+          <p class="code-head"><span class="ok m-hide">200 OK</span><span class="ms m-hide">142 ms</span></p>
+          <pre><span class="ln m-hide">{"{"}</span><span class="ln m-hide">  <span class="k">"results"</span>: [{"{"}</span><span class="ln m-hide">    <span class="k">"name"</span>: <span class="s">"Boris Sofman"</span>,</span><span class="ln m-hide">    <span class="k">"title"</span>: <span class="s">"Co-Founder &amp; CEO"</span>,</span><span class="ln m-hide">    <span class="k">"path"</span>: <span class="s">"via Alex Teichman"</span>,</span><span class="ln m-hide">    <span class="k">"strength"</span>: <span class="n">0.92</span></span><span class="ln m-hide">  {"}"}]</span><span class="ln m-hide">{"}"}</span></pre>
         </div>
       </div></div>
     </div>
@@ -196,43 +188,214 @@ const worksWith = [
         <span class="more">Install the CLI <img src={arrowRight} alt="" width="16" height="16" /></span>
       </div>
 
-      <div class="visual-wrap"><div class="visual visual-cli" data-fit="540" aria-hidden="true">
-        <div class="code code-terminal">
+      <div class="visual-wrap"><div class="visual visual-cli" data-fit="540" data-motion data-seq="cli" aria-hidden="true">
+        <div class="code code-terminal m-hide">
+          <ThinkingBot tone="dark" class="cli-think" />
           <p class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="term-title">zsh — happenstance</span></p>
-          <pre><span class="s">$</span> npm i -g happenstance
-<span class="s">$</span> happenstance search <span class="o">"seed investors in robotics"</span>
-
-<span class="s">Searched 183,450 connections in 1.2s</span>
-
-  1  Boris Sofman   <span class="m">via Alex Teichman</span>   <span class="s">strong</span>
-  2  Maya Chen      <span class="m">via Priya Desai</span>     <span class="y">good</span>
-  3  Tom Hughes     <span class="m">via Dana Fox</span>        <span class="m">weak</span>
-
-<span class="s">$</span> <span class="cursor">_</span></pre>
+          <pre><span class="ln m-hide" data-typed-line><span class="s">$</span> npm i -g happenstance</span><span class="ln m-hide" data-typed-line><span class="s">$</span> happenstance search <span class="o">"seed investors in robotics"</span></span><span class="ln blank"> </span><span class="ln m-hide"><span class="s">Searched 183,450 connections in 1.2s</span></span><span class="ln blank"> </span><span class="ln m-hide">  1  Boris Sofman   <span class="m">via Alex Teichman</span>   <span class="s">strong</span></span><span class="ln m-hide">  2  Maya Chen      <span class="m">via Priya Desai</span>     <span class="y">good</span></span><span class="ln m-hide">  3  Tom Hughes     <span class="m">via Dana Fox</span>        <span class="m">weak</span></span><span class="ln blank"> </span><span class="ln m-hide"><span class="s">$</span> <span class="cursor">_</span></span></pre>
         </div>
       </div></div>
     </div>
   </div>
+  <script is:inline>
+    // Marks the visuals before they paint so their pieces can be revealed in sequence.
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches)
+      document.currentScript.parentElement.querySelectorAll('[data-motion]').forEach((el) => (el.dataset.motion = 'pending'));
+  </script>
 </section>
 
 <script>
+  import { createSequence, reducedMotion, rise, fadeUp, pop, EASE_SETTLE } from '../scripts/motion';
+
+  type Seq = ReturnType<typeof createSequence>;
+
+  // Once a tab's visual has finished building, it stays up this long before the next tab.
+  const READ_MS = 3500;
+
+  // Code lines "type" with a stepped wipe (one step per character); output lines just print.
+  const typeLine = (s: Seq, line: Element, delay: number, msPerChar = 22) => {
+    const chars = (line.textContent ?? '').length;
+    const duration = Math.max(240, chars * msPerChar);
+    s.reveal(line, [{ opacity: 1, clipPath: 'inset(0 100% 0 0)' }, { opacity: 1, clipPath: 'inset(0 0 0 0)' }], {
+      duration,
+      delay,
+      easing: `steps(${Math.max(1, chars)}, end)`,
+    });
+    return delay + duration;
+  };
+  const printLine = (s: Seq, line: Element, delay: number) =>
+    s.reveal(line, [{ opacity: 0, transform: 'translateY(3px)' }, { opacity: 1, transform: 'none' }], { duration: 320, delay });
+
+  const sequences: Record<string, (v: HTMLElement, s: Seq) => void> = {
+    mcp: (v, s) => {
+      s.reveal(v.querySelector('.chat'), rise, { duration: 600 });
+      s.reveal(v.querySelector('.bubble'), [{ opacity: 0, transform: 'translateX(10px) scale(0.97)' }, { opacity: 1, transform: 'none' }], {
+        duration: 520,
+        delay: 260,
+      });
+      const tool = v.querySelector<HTMLElement>('.tool')!;
+      const bot = v.querySelector<HTMLElement>('.mcp-think');
+      if (bot) bot.style.top = `${tool.offsetTop - 4}px`;
+      const toolAt = s.think(bot, 760, 1000);
+      s.reveal(tool, fadeUp, { duration: 480, delay: toolAt });
+      const streamed = s.stream(v.querySelector<HTMLElement>('[data-stream]')!, { delay: toolAt + 450, stagger: 60 });
+      s.reveal(v.querySelector('.warm'), rise, { duration: 620, delay: streamed - 120 });
+      v.querySelectorAll('.warm .bars i').forEach((bar, j) =>
+        s.play(bar, [{ transform: 'scaleY(0)', transformOrigin: '50% 100%' }, { transform: 'scaleY(1)', transformOrigin: '50% 100%' }], {
+          duration: 420,
+          delay: streamed + 260 + j * 70,
+        }),
+      );
+      s.reveal(v.querySelector('.more-paths'), fadeUp, { duration: 460, delay: streamed + 520 });
+      s.reveal(v.querySelector('.code-mcp'), [{ opacity: 0, transform: 'translate(10px, 12px)' }, { opacity: 1, transform: 'none' }], {
+        duration: 650,
+        delay: streamed + 380,
+      });
+      v.querySelectorAll('.code-mcp .ln').forEach((ln, i) => typeLine(s, ln, streamed + 700 + i * 260, 16));
+    },
+
+    api: (v, s) => {
+      s.reveal(v.querySelector('.code-request'), rise, { duration: 600 });
+      let t = 380;
+      v.querySelectorAll('.code-request .ln').forEach((ln) => (t = typeLine(s, ln, t, 14) + 120));
+      t = s.think(v.querySelector('.api-think'), t + 60, 900) - 120;
+      s.reveal(v.querySelector('.code-response'), rise, { duration: 620, delay: t + 120 });
+      s.reveal(v.querySelector('.ok'), pop, { duration: 460, delay: t + 380, easing: EASE_SETTLE });
+      s.reveal(v.querySelector('.ms'), fadeUp, { duration: 400, delay: t + 480 });
+      v.querySelectorAll('.code-response .ln').forEach((ln, i) => printLine(s, ln, t + 560 + i * 110));
+    },
+
+    cli: (v, s) => {
+      s.reveal(v.querySelector('.code-terminal'), rise, { duration: 600 });
+      const lines = [...v.querySelectorAll('.code-terminal .ln.m-hide')];
+      let t = 420;
+      t = typeLine(s, lines[0], t, 38) + 520; // npm i -g happenstance
+      t = typeLine(s, lines[1], t, 30) + 200; // happenstance search …
+      const bot = v.querySelector<HTMLElement>('.cli-think');
+      if (bot) bot.style.top = `${(lines[2] as HTMLElement).offsetTop - 3}px`;
+      t = s.think(bot, t, 1000) + 60;
+      printLine(s, lines[2], t); // Searched …
+      t += 380;
+      lines.slice(3, 6).forEach((ln, i) => printLine(s, ln, t + i * 150));
+      printLine(s, lines[6], t + 3 * 150 + 260); // prompt
+    },
+  };
+
   document.querySelectorAll<HTMLElement>('[data-tabs]').forEach((root) => {
     const tabs = [...root.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
     const panels = tabs.map((tab) => document.getElementById(tab.getAttribute('aria-controls')!)!);
     const backgrounds = [...root.querySelectorAll<HTMLElement>('[data-bg]')];
+    const visuals = panels.map((panel) => panel.querySelector<HTMLElement>('[data-motion]')!);
+    const animate = !reducedMotion() && visuals.every((v) => v.dataset.motion === 'pending');
+    const seqs = visuals.map((v) => createSequence(v));
 
-    const select = (index: number, focus = false) => {
+    let current = 0;
+    let started = false;
+    let timer: Animation | null = null;
+    const holds = new Set<string>(); // reasons auto-rotation is paused
+
+    const playPanel = (i: number) => {
+      if (!animate) return;
+      seqs[i].reset();
+      visuals[i].dataset.motion = 'playing';
+      sequences[visuals[i].dataset.seq!](visuals[i], seqs[i]);
+    };
+
+    // Auto-advance waits for the active visual to finish animating, then a short reading pause.
+    let run = 0;
+    const startTimer = async () => {
+      if (!animate) return;
+      timer?.cancel();
+      timer = null;
+      const mine = ++run;
+      await seqs[current].settled();
+      if (mine !== run) return; // a click or another advance started a new run meanwhile
+      timer = root.animate([], { duration: READ_MS });
+      timer.onfinish = () => select((current + 1) % tabs.length);
+      if (holds.size) timer.pause();
+    };
+
+    const hold = (reason: string, on: boolean) => {
+      if (on) holds.add(reason);
+      else holds.delete(reason);
+      if (!timer) return;
+      if (holds.size) timer.pause();
+      else if (timer.playState === 'paused') timer.play();
+    };
+
+    // The stem under the tabs glides to the centre of the active tab.
+    const tablist = root.querySelector<HTMLElement>('[role="tablist"]')!;
+    const placeStem = () => {
+      const tab = tabs[current];
+      tablist.style.setProperty('--stem-x', `${tab.offsetLeft + tab.offsetWidth / 2}px`);
+    };
+    new ResizeObserver(placeStem).observe(tablist);
+
+    // Panels share one grid cell: the old one fades out underneath while the new one fades up.
+    let leaving: { panel: HTMLElement; anim: Animation } | null = null;
+    const swapPanels = (from: number, to: number) => {
+      if (leaving) {
+        leaving.anim.cancel();
+        leaving.panel.classList.remove('is-leaving');
+        leaving.panel.hidden = leaving.panel !== panels[to];
+        leaving = null;
+      }
+      panels.forEach((panel, i) => {
+        panel.classList.toggle('is-active', i === to);
+        if (i !== to && i !== from) panel.hidden = true;
+      });
+      panels[to].hidden = false;
+      if (from === to || !animate) {
+        panels[from].hidden = from !== to;
+        return;
+      }
+      const out = panels[from];
+      out.classList.add('is-leaving');
+      const anim = out.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateY(-6px)' }], {
+        duration: 320,
+        easing: 'cubic-bezier(0.4, 0, 1, 1)',
+        fill: 'forwards',
+      });
+      leaving = { panel: out, anim };
+      anim.finished.then(() => {
+        out.hidden = true;
+        out.classList.remove('is-leaving');
+        anim.cancel();
+        if (leaving?.panel === out) leaving = null;
+      }, () => {});
+      panels[to].animate([{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'none' }], {
+        duration: 520,
+        delay: 60,
+        easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+        fill: 'backwards',
+      });
+    };
+
+    function select(index: number, focus = false) {
+      const previous = current;
+      current = index;
       tabs.forEach((tab, i) => {
         const active = i === index;
         tab.classList.toggle('is-active', active);
         tab.setAttribute('aria-selected', String(active));
         tab.tabIndex = active ? 0 : -1;
-        panels[i].hidden = !active;
-        panels[i].classList.toggle('is-active', active);
         backgrounds[i]?.classList.toggle('is-active', active);
       });
+      swapPanels(previous, index);
+      placeStem();
+      if (animate && previous !== index) {
+        tabs[index].querySelector('.tab-inner')!.animate(
+          [{ opacity: 0.4, transform: 'scale(0.96)' }, { opacity: 1, transform: 'none' }],
+          { duration: 380, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' },
+        );
+      }
       if (focus) tabs[index].focus();
-    };
+      if (animate) {
+        started = true;
+        playPanel(index);
+        startTimer();
+      }
+    }
 
     tabs.forEach((tab, i) => {
       tab.addEventListener('click', () => select(i));
@@ -249,6 +412,32 @@ const worksWith = [
         }
       });
     });
+
+    if (!animate) return;
+    visuals.forEach((v, i) => {
+      seqs[i].reset();
+      v.dataset.motion = 'ready';
+    });
+
+    // Pause rotation while someone is reading or using the tabs, and while off screen.
+    root.addEventListener('pointerenter', () => hold('hover', true));
+    root.addEventListener('pointerleave', () => hold('hover', false));
+    root.addEventListener('focusin', () => hold('focus', true));
+    root.addEventListener('focusout', (e) => {
+      if (!root.contains(e.relatedTarget as Node)) hold('focus', false);
+    });
+
+    new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !started && entry.intersectionRatio >= 0.35) {
+          started = true;
+          playPanel(current);
+          startTimer();
+        }
+        hold('offscreen', !entry.isIntersecting);
+      },
+      { threshold: [0, 0.35] },
+    ).observe(root);
   });
 </script>
 
@@ -262,9 +451,10 @@ const worksWith = [
 
   .stage {
     position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-content: start;
+    justify-items: center;
     min-height: 680px;
     padding: 56px 96px;
     overflow: hidden;
@@ -279,7 +469,7 @@ const worksWith = [
     height: 100%;
     object-fit: cover;
     opacity: 0;
-    transition: opacity 600ms var(--ease);
+    transition: opacity 800ms var(--ease);
   }
 
   .stage-bg.is-active {
@@ -347,21 +537,26 @@ const worksWith = [
   }
 
   /* Stem joining the active tab to the card */
-  .tab.is-active::after {
-    content: '';
+  /* Stem joining the active tab to the card; one element that glides between tabs. */
+  .stem {
     position: absolute;
     top: calc(100% - 1px);
-    left: calc(50% - 2px);
+    left: var(--stem-x, 49.5px);
     width: 4px;
     height: 32px;
+    margin-left: -2px;
     border-radius: 2px;
     background: var(--surface);
+    pointer-events: none;
+    transition: left 520ms cubic-bezier(0.65, 0, 0.35, 1);
   }
 
   /* Card */
   .card {
     position: relative;
     z-index: 1;
+    grid-row: 2;
+    grid-column: 1;
     display: flex;
     align-items: center;
     gap: 40px;
@@ -379,13 +574,14 @@ const worksWith = [
     display: none;
   }
 
-  .card.is-active .copy > *,
-  .card.is-active .visual > * {
-    animation: enter 450ms var(--ease) both;
+  .card.is-leaving {
+    z-index: 0;
+    pointer-events: none;
   }
 
-  .card.is-active .visual > :nth-child(2) {
-    animation-delay: 80ms;
+  /* The copy fades in with CSS; the visual builds step by step from the script below. */
+  .card.is-active .copy > * {
+    animation: enter 450ms var(--ease) both;
   }
 
   @keyframes enter {
@@ -703,6 +899,32 @@ const worksWith = [
     font-size: 12px;
     line-height: 1.7;
     white-space: pre;
+  }
+
+  /* Thinking bot placements (top is set from the script for the chat and terminal). */
+  .chat :global(.mcp-think) {
+    position: absolute;
+    left: 16px;
+    z-index: 1;
+  }
+
+  .visual :global(.api-think) {
+    position: absolute;
+    top: 168px;
+    left: 88px;
+    z-index: 3;
+  }
+
+  .code-terminal :global(.cli-think) {
+    position: absolute;
+    left: 18px;
+    z-index: 1;
+  }
+
+  /* One element per code line so lines can be typed or printed in turn. */
+  .ln {
+    display: block;
+    width: max-content;
   }
 
   .k {

@@ -211,3 +211,26 @@ a {
     scroll-behavior: auto !important;
   }
 }
+
+/* In-card motion (see src/scripts/motion.ts). Server HTML is the finished design; when motion is
+   allowed an inline script marks sequence roots data-motion="pending" before first paint. */
+/* Only once a script has set a state: the bare attribute in server HTML hides nothing. */
+[data-motion]:not([data-motion='']) .m-hide:not(.is-in),
+[data-motion]:not([data-motion='']) [data-stream]:not(.is-in) {
+  opacity: 0;
+}
+
+[data-motion='pending'] [data-type] {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-motion]:not([data-motion='']) .m-hide:not(.is-in),
+  [data-motion]:not([data-motion='']) [data-stream]:not(.is-in) {
+    opacity: 1;
+  }
+
+  [data-motion='pending'] [data-type] {
+    display: inline;
+  }
+}

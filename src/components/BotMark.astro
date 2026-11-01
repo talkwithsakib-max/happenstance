@@ -1,0 +1,132 @@
+---
+// The Happenstance flower as a little bot: petals turn and breathe, and its two eyes look
+// up, right, down and left, blinking now and then. It loops for as long as it is on the page
+// (and holds still with reduced motion). Used for the logo badges and inside ThinkingBot.
+interface Props {
+  size?: number;
+  class?: string;
+}
+
+const { size = 20, class: className } = Astro.props;
+const id = `mark-${Math.random().toString(36).slice(2, 8)}`;
+const petals = [0, 60, 120, 180, 240, 300];
+---
+
+<svg class:list={['bot-mark', className]} viewBox="0 0 32 32" width={size} height={size} aria-hidden="true">
+  <defs>
+    <radialGradient id={`${id}-petal`} cx="35%" cy="30%" r="80%">
+      <stop offset="0" stop-color="#8cc2ff"></stop>
+      <stop offset="0.55" stop-color="#3d85f7"></stop>
+      <stop offset="1" stop-color="#1d5ce6"></stop>
+    </radialGradient>
+  </defs>
+  <g class="petals">
+    {
+      petals.map((deg, i) => (
+        <circle
+          class="petal"
+          cx={16 + 7.2 * Math.cos(((deg - 90) * Math.PI) / 180)}
+          cy={16 + 7.2 * Math.sin(((deg - 90) * Math.PI) / 180)}
+          r="6.1"
+          fill={`url(#${id}-petal)`}
+          style={`animation-delay:${i * 120}ms`}
+        />
+      ))
+    }
+  </g>
+  <circle cx="16" cy="16" r="5.6" fill="#2f6fe8"></circle>
+  <g class="eyes">
+    <ellipse cx="13.7" cy="16" rx="1.25" ry="1.75" fill="#fff"></ellipse>
+    <ellipse cx="18.3" cy="16" rx="1.25" ry="1.75" fill="#fff"></ellipse>
+  </g>
+</svg>
+
+<style>
+  .bot-mark {
+    flex-shrink: 0;
+    overflow: visible;
+    /* A very light lift so the mark reads on white badges. */
+    filter: drop-shadow(0 1px 1.5px rgba(29, 92, 230, 0.32)) drop-shadow(0 2px 4px rgba(29, 92, 230, 0.14));
+  }
+
+  .petals {
+    transform-origin: 16px 16px;
+    animation: mark-spin 5.5s linear infinite;
+  }
+
+  .petal {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: mark-breathe 1.2s ease-in-out infinite alternate;
+  }
+
+  /* Look up, right, down, left, back to centre; a blink rides along. */
+  .eyes {
+    transform-origin: 16px 16px;
+    animation:
+      mark-look 4.8s ease-in-out infinite,
+      mark-blink 4.8s ease-in-out infinite;
+  }
+
+  @keyframes mark-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes mark-breathe {
+    from {
+      transform: scale(0.9);
+    }
+    to {
+      transform: scale(1.04);
+    }
+  }
+
+  @keyframes mark-look {
+    0%,
+    8% {
+      translate: 0 0;
+    }
+    14%,
+    24% {
+      translate: 0 -1px;
+    }
+    30%,
+    40% {
+      translate: 1px 0;
+    }
+    46%,
+    56% {
+      translate: 0 1px;
+    }
+    62%,
+    72% {
+      translate: -1px 0;
+    }
+    80%,
+    100% {
+      translate: 0 0;
+    }
+  }
+
+  @keyframes mark-blink {
+    0%,
+    86%,
+    92%,
+    100% {
+      scale: 1 1;
+    }
+    89% {
+      scale: 1 0.15;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .petals,
+    .petal,
+    .eyes {
+      animation: none;
+    }
+  }
+</style>

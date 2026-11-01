@@ -1,0 +1,319 @@
+---
+// Step 1 of the Network showcase ("Connect your accounts"), built from Figma node 215:506.
+// The server HTML is the finished Figma frame. When the step is active, colored signals run
+// along the connector lines into "You", one line drops to the source stack, and the stack
+// cycles its cards forward (start/stop are driven by the showcase script in Network.astro).
+import { Image } from 'astro:assets';
+import BotMark from './BotMark.astro';
+
+import bg from '../assets/network/connect/bg.png';
+import grain from '../assets/hero/grain.png';
+import you from '../assets/jobs/get-referred/you.png';
+import outlook from '../assets/network/connect/outlook.svg?url';
+import linkedin from '../assets/network/connect/linkedin.svg?url';
+import linkedinSm from '../assets/network/connect/linkedin-sm.svg?url';
+import x from '../assets/network/connect/x.svg?url';
+import calendar from '../assets/icons/calendar.png';
+import gmail from '../assets/icons/gmail-fill.png';
+
+interface Props {
+  label: string;
+  active?: boolean;
+}
+const { label, active = false } = Astro.props;
+
+// Frame coordinates (650 × 560). Every line runs from its account tile to the centre of "You".
+const YOU = { x: 325, y: 241 };
+const accounts = [
+  { name: 'Outlook', src: outlook, w: 30, h: 30, left: 82.5, top: 213, from: [138.5, 241], color: '#0f78d4' },
+  { name: 'Calendar', src: calendar.src, w: 30, h: 30, left: 150.5, top: 76, from: [192.9, 121], color: '#4285f4' },
+  { name: 'Gmail', src: gmail.src, w: 30, h: 22.5, left: 296.5, top: 56, from: [325, 69], color: '#ea4335' },
+  { name: 'X', src: x, w: 26, h: 23.5, left: 443.5, top: 76, from: [457.1, 121], color: '#111111' },
+  { name: 'LinkedIn', src: linkedin, w: 30, h: 30, left: 511.5, top: 213, from: [511.5, 241], color: '#0a66c2' },
+];
+const DROP = { from: [325, 265], to: [325, 378] };
+
+// Source stack, front card first; only three show at a time, the rest wait hidden at the back.
+// `line` is the account whose signal feeds that card.
+const sources = [
+  { name: 'LinkedIn', icon: linkedinSm, w: 18, h: 18, people: 24700, badge: 128, line: 4 },
+  { name: 'Gmail', icon: gmail.src, w: 18, h: 13.5, people: 860, badge: 24, line: 2 },
+  { name: 'Calendar', icon: calendar.src, w: 18, h: 18, people: 1480, badge: 9, line: 1 },
+  { name: 'X', icon: x, w: 16, h: 14.5, people: 3940, badge: 56, line: 3 },
+  { name: 'Outlook', icon: outlook, w: 18, h: 18, people: 2310, badge: 31, line: 0 },
+];
+
+const path = (a: number[], b: number[]) => `M${a[0]} ${a[1]}L${b[0]} ${b[1]}`;
+---
+
+<div class:list={['frame', 'cx', { 'is-active': active }]} data-frame="0" data-connect role="img" aria-label={label}>
+  <div class="cx-bg" aria-hidden="true">
+    <Image src={bg} alt="" widths={[650, 1024]} sizes="650px" loading="lazy" />
+    <div class="cx-grain" style={`background-image:url(${grain.src})`}></div>
+  </div>
+
+  <div class="cx-stage" aria-hidden="true">
+    <svg class="cx-lines" viewBox="0 0 650 560" width="650" height="560">
+      <g class="cx-rails">
+        {accounts.map((a) => <path d={path(a.from, [YOU.x, YOU.y])} />)}
+        <path d={path(DROP.from, DROP.to)} />
+      </g>
+      <g class="cx-signals">
+        {
+          accounts.map((a) => (
+            <path class="cx-signal" d={path(a.from, [YOU.x, YOU.y])} style={`color:${a.color}`} pathLength="100" data-signal />
+          ))
+        }
+        <path class="cx-signal cx-drop" d={path(DROP.from, DROP.to)} style="color:#1e82e0" pathLength="100" data-drop />
+      </g>
+    </svg>
+
+    {
+      accounts.map((a) => (
+        <span class="cx-tile" style={`left:${a.left}px;top:${a.top}px`} data-account>
+          <img src={a.src} alt="" width={a.w} height={a.h} />
+        </span>
+      ))
+    }
+
+    <div class="cx-you" data-you>
+      <Image src={you} alt="" width={60} height={60} densities={[1, 2]} loading="lazy" />
+    </div>
+    <span class="cx-badge"><BotMark size={18} /></span>
+
+    <ul class="cx-stack" data-stack>
+      {
+        sources.map((s, i) => (
+          <li class="cx-card" data-slot={i} data-line={s.line} data-people={s.people} data-badge={s.badge}>
+            <span class="cx-card-icon">
+              <img src={s.icon} alt="" width={s.w} height={s.h} />
+            </span>
+            <span class="cx-card-info">
+              <span class="cx-card-name">{s.name}</span>
+              <span class="cx-card-count">
+                <span data-count>{s.people.toLocaleString('en-US')}</span> people
+              </span>
+            </span>
+            <span class="cx-card-badge" data-pop>+{s.badge}</span>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</div>
+
+<style>
+  .cx {
+    overflow: hidden;
+    container-type: size;
+  }
+
+  .cx-bg,
+  .cx-bg img,
+  .cx-grain {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .cx-bg img {
+    object-fit: cover;
+  }
+
+  .cx-grain {
+    background-size: 50px 50px;
+    mix-blend-mode: overlay;
+    opacity: 0.35;
+  }
+
+  /* The Figma frame at its native size, scaled to whatever the visual box is. */
+  .cx-stage {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 650px;
+    height: 560px;
+    translate: -50% -50%;
+    scale: var(--cx-fit, 1);
+  }
+
+  .cx-lines {
+    position: absolute;
+    inset: 0;
+    overflow: visible;
+  }
+
+  .cx-rails path {
+    stroke: #fff;
+    stroke-width: 2;
+  }
+
+  .cx-signal {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-dasharray: 34 200;
+    stroke-dashoffset: 34;
+    opacity: 0;
+    filter: drop-shadow(0 0 4px currentColor);
+  }
+
+  .cx-tile {
+    position: absolute;
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: var(--shadow-card);
+  }
+
+  .cx-you {
+    position: absolute;
+    left: 283.2px;
+    top: 193.7px;
+    display: grid;
+    place-items: center;
+    width: 84px;
+    height: 84px;
+    overflow: hidden;
+    border: 2px solid #1e82e0;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow:
+      inset -3px -3px 4px rgba(191, 229, 251, 0.4),
+      inset 4px 4px 4px rgba(19, 26, 228, 0.1),
+      0 0 0 0 rgba(30, 130, 224, 0);
+  }
+
+  .cx-you img {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .cx-badge {
+    position: absolute;
+    left: 338.5px;
+    top: 259px;
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    background: #fafafa;
+    box-shadow:
+      0 2px 3px rgba(0, 0, 0, 0.3),
+      0 3px 4px rgba(0, 0, 0, 0.15),
+      inset 0 2px 2px rgba(255, 255, 255, 0.8),
+      inset 0 -3px 0 rgba(0, 0, 0, 0.16);
+  }
+
+  /* Source stack: three slots, front card first (Figma: 300 / 268 / 236 wide, 1 / .8 / .45). */
+  .cx-stack {
+    position: absolute;
+    left: 175.5px;
+    top: 378px;
+    width: 300px;
+    height: 126px;
+  }
+
+  .cx-card {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 300px;
+    padding: 10px;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: var(--shadow-card);
+    transform-origin: 50% 0;
+    transition:
+      transform 640ms var(--ease-move, cubic-bezier(0.65, 0, 0.35, 1)),
+      opacity 640ms var(--ease-move, cubic-bezier(0.65, 0, 0.35, 1));
+  }
+
+  .cx-card[data-slot='0'] {
+    z-index: 3;
+  }
+
+  .cx-card[data-slot='1'] {
+    z-index: 2;
+    opacity: 0.8;
+    transform: translateY(38px) scale(0.893);
+  }
+
+  .cx-card[data-slot='2'] {
+    z-index: 1;
+    opacity: 0.45;
+    transform: translateY(72px) scale(0.787);
+  }
+
+  .cx-card[data-slot='3'],
+  .cx-card[data-slot='4'] {
+    z-index: 0;
+    opacity: 0;
+    transform: translateY(96px) scale(0.7);
+  }
+
+  /* The old front card lifts away, then waits hidden at the back of the queue. */
+  .cx-card[data-slot='out'] {
+    z-index: 4;
+    opacity: 0;
+    transform: translateY(-18px) scale(1.03);
+    transition-duration: 380ms;
+    transition-timing-function: cubic-bezier(0.4, 0, 1, 1);
+  }
+
+  .cx-instant .cx-card {
+    transition: none;
+  }
+
+  .cx-card-icon {
+    display: grid;
+    flex-shrink: 0;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    background: #f4f5f7;
+  }
+
+  .cx-card-info {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    flex-direction: column;
+    gap: 1px;
+    white-space: nowrap;
+  }
+
+  .cx-card-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #0a0a0a;
+  }
+
+  .cx-card-count {
+    font-size: 11px;
+    color: #8a8f9c;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .cx-card-badge {
+    flex-shrink: 0;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: #111;
+    font-size: 10px;
+    font-weight: 600;
+    color: #fff;
+  }
+</style>

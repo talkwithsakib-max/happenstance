@@ -1,0 +1,708 @@
+---
+// Steps 2–4 of the Network showcase, rebuilt from Figma (nodes 228:1224, 228:1697, 252:1126).
+// The server HTML is each finished Figma frame. Motion (network-steps.ts) follows the concept of
+// happenstance.ai's own showcase: the map bursts out of "You", friends and groups widen it to a
+// second ring, and a search sweeps the network before lighting up the warm path.
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+import mapDots from '../assets/network/map/map.svg?url';
+import mapYou from '../assets/network/map/you.png';
+import halo from '../assets/network/map/halo.svg?url';
+import ny from '../assets/network/map/ny.png';
+import london from '../assets/network/map/london.png';
+import lagos from '../assets/network/map/lagos.png';
+import saoPaulo from '../assets/network/map/saopaulo.png';
+import bangalore from '../assets/network/map/bangalore.png';
+import singapore from '../assets/network/map/singapore.png';
+import tokyo from '../assets/network/map/tokyo.png';
+import sydney from '../assets/network/map/sydney.png';
+import lineNy from '../assets/network/map/line-ny.svg?raw';
+import lineLondon from '../assets/network/map/line-london.svg?raw';
+import lineLagos from '../assets/network/map/line-lagos.svg?raw';
+import lineSaoPaulo from '../assets/network/map/line-saopaulo.svg?raw';
+import lineBangalore from '../assets/network/map/line-bangalore.svg?raw';
+import lineSingapore from '../assets/network/map/line-singapore.svg?raw';
+import lineTokyo from '../assets/network/map/line-tokyo.svg?raw';
+import lineSydney from '../assets/network/map/line-sydney.svg?raw';
+
+import glow from '../assets/network/friends/glow.svg?url';
+import ring1 from '../assets/network/friends/ring-1.svg?url';
+import ring2 from '../assets/network/friends/ring-2.svg?url';
+import ring3 from '../assets/network/friends/ring-3.png';
+import pulse from '../assets/network/friends/pulse.svg?url';
+import plus from '../assets/network/friends/plus.svg?url';
+import dot2nd from '../assets/network/friends/dot-2nd.png';
+import ringYou from '../assets/network/friends/you.png';
+import sarah from '../assets/network/friends/sarah.png';
+import rahul from '../assets/network/friends/rahul.png';
+import emma from '../assets/network/friends/emma.png';
+import omar from '../assets/network/friends/omar.png';
+import olivia from '../assets/network/friends/olivia.png';
+import maya from '../assets/network/friends/maya.png';
+import avatar1 from '../assets/hero/avatar-1.jpg';
+import avatar2 from '../assets/hero/avatar-2.jpg';
+import avatar3 from '../assets/hero/avatar-3.jpg';
+import avatar4 from '../assets/hero/avatar-4.jpg';
+import avatar5 from '../assets/hero/avatar-5.jpg';
+import alex from '../assets/jobs/who-you-know/alex.png';
+import drew from '../assets/jobs/who-you-know/drew.png';
+import ishan from '../assets/jobs/who-you-know/ishan.png';
+import jack from '../assets/jobs/who-you-know/jack-ng.png';
+import kevin from '../assets/jobs/who-you-know/kevin-wang.png';
+
+import searchIcon from '../assets/network/search/search.svg?url';
+import n0 from '../assets/network/search/n0.png';
+import n1 from '../assets/network/search/n1.png';
+import n2 from '../assets/network/search/n2.png';
+import n3 from '../assets/network/search/n3.png';
+import n4 from '../assets/network/search/n4.png';
+import n5 from '../assets/network/search/n5.png';
+import n6 from '../assets/network/search/n6.png';
+import searchRahul from '../assets/network/search/rahul.png';
+import leo from '../assets/network/search/leo.png';
+import leoAvatar from '../assets/network/search/leo-avatar.png';
+
+interface Props {
+  labels: string[];
+}
+const { labels } = Astro.props;
+
+// Figma exports each avatar with its ring and shadow baked in, larger than the circle it sits on.
+// `pad` is how far the export reaches past the circle on the left and top.
+interface Person {
+  src: ImageMetadata;
+  x: number;
+  y: number;
+  size: number;
+  pad: [number, number];
+  grow: number;
+}
+const person = (src: ImageMetadata, x: number, y: number, size: number, pad: [number, number], grow: number): Person => ({
+  src,
+  x,
+  y,
+  size,
+  pad,
+  grow,
+});
+
+/* ---- 02 · Map ---- */
+const MAP_YOU = { x: 99.5, y: 206.3 };
+const mapPeople = [
+  person(ny, 165, 165, 44, [19, 11], 38),
+  person(london, 271, 155, 44, [19, 11], 38),
+  person(lagos, 279, 255, 38, [18.5, 10.5], 37),
+  person(saoPaulo, 205, 318, 32, [18.5, 10.5], 37),
+  person(bangalore, 395, 238, 38, [18.5, 10.5], 37),
+  person(singapore, 443, 274, 32, [18.5, 10.5], 37),
+  person(tokyo, 487, 183, 38, [18.5, 10.5], 37),
+  person(sydney, 512, 339, 32, [18.5, 10.5], 37),
+];
+// Figma's line SVGs, inlined so they can be revealed together (ids dropped, they repeat).
+const mapLines = [lineNy, lineLondon, lineLagos, lineSaoPaulo, lineBangalore, lineSingapore, lineTokyo, lineSydney]
+  .map((svg) => svg.replace(/^[\s\S]*?<svg[^>]*>|<\/svg>\s*$/g, '').replace(/\sid="[^"]*"/g, ''))
+  .join('');
+const mapGroups = [
+  { name: 'Startup Founders', count: '318', color: '#8b5cf6', x: 24, y: 28 },
+  { name: 'Early-Stage Investors', count: '96', color: '#10b981', x: 365, y: 28 },
+  { name: 'YC Leadership', count: '42', color: '#ec4899', x: 24, y: 420, raised: true },
+  { name: 'YC Operations', count: '27', color: '#f59e0b', x: 409, y: 420, raised: true },
+];
+const strengths = [
+  { label: 'Close', bars: ['#d97706', '#d97706', '#e5e7eb'], color: '#b45309' },
+  { label: 'Strong', bars: ['#16a34a', '#16a34a', '#16a34a'], color: '#15803d' },
+  { label: 'Weak', bars: ['#d95306', '#e5e7eb', '#e5e7eb'], color: '#b41709' },
+];
+
+/* ---- 03 · Friends and groups ---- */
+const HUB = { x: 293.5, y: 250 };
+const friends = [
+  person(sarah, 269.5, 138, 48, [10, 7], 20),
+  person(rahul, 345.71, 182, 48, [10, 7], 20),
+  person(emma, 345.71, 270, 48, [10, 7], 20),
+  person(omar, 269.5, 314, 48, [10, 7], 20),
+  person(olivia, 193.29, 182, 48, [10, 7], 20),
+];
+// Hidden in Figma as the "wider network" layer: group members and second-degree people.
+const members = [
+  person(ny, 314.84, 85.18, 36, [19, 11], 38),
+  person(bangalore, 407.14, 308, 36, [19, 11], 38),
+  person(lagos, 322.47, 376.56, 36, [19, 11], 38),
+  person(london, 128.68, 271.34, 36, [19, 11], 38),
+  person(tokyo, 128.68, 192.66, 36, [19, 11], 38),
+];
+const secondDegree = [
+  { src: avatar1, x: 70.86, y: 180.1 },
+  { src: alex, x: 126.76, y: 83.26 },
+  { src: avatar2, x: 223.6, y: 27.36 },
+  { src: drew, x: 482.47, y: 162.12 },
+  { src: avatar3, x: 490.78, y: 280.91 },
+  { src: ishan, x: 434.88, y: 386.05 },
+  { src: avatar4, x: 331.76, y: 445.58 },
+  { src: jack, x: 227.24, y: 445.58 },
+  { src: avatar5, x: 124.12, y: 386.05 },
+  { src: kevin, x: 69.92, y: 288.26 },
+];
+const friendGroups = [
+  { name: 'Stanford GSB', count: '1.2k', color: '#d97706', x: 137, y: 106 },
+  { name: 'YC W24', count: '418', color: '#8b5cf6', x: 387, y: 230 },
+  { name: 'Ex-Stripe', count: '236', color: '#16a34a', x: 160, y: 369 },
+];
+// Spokes from "You" to each friend; the first (to Sarah) is the highlighted one.
+const spokes = [
+  [293.5, 162],
+  [369.71, 206],
+  [369.71, 294],
+  [293.5, 338],
+  [217.29, 206],
+];
+// Figma's dashed curve from Sarah to Maya (already split into dashes).
+const SARAH_TO_MAYA =
+  'M293.5 162C293.721 161.373 293.944 160.75 294.169 160.13M407.963 66.8216C407.304 66.8996 406.647 66.9811 405.993 67.066M295.548 156.438C296.024 155.2 296.51 153.974 297.004 152.761M298.534 149.116C299.059 147.901 299.594 146.7 300.138 145.511M301.819 141.946C302.398 140.752 302.988 139.572 303.587 138.406M305.436 134.914C306.069 133.752 306.713 132.604 307.368 131.471M309.384 128.082C310.076 126.952 310.778 125.838 311.492 124.739M313.69 121.455C314.441 120.366 315.204 119.293 315.978 118.235M318.355 115.084C319.166 114.041 319.988 113.015 320.823 112.005M323.385 108.999C324.257 108.006 325.142 107.031 326.039 106.072M328.784 103.231C329.715 102.297 330.66 101.38 331.616 100.481M334.537 97.8232C335.526 96.9522 336.528 96.0988 337.542 95.263M340.632 92.803C341.675 91.9998 342.732 91.2144 343.801 90.4466M347.047 88.1972C348.14 87.4661 349.246 86.7526 350.365 86.0568M353.752 84.0267C354.89 83.3697 356.041 82.7302 357.204 82.1081M360.718 80.3015C361.894 79.7201 363.083 79.1559 364.285 78.6087M367.902 77.0289C369.111 76.5227 370.333 76.0332 371.567 75.5604M375.275 74.2018C376.512 73.7689 377.762 73.3522 379.023 72.9516M382.807 71.808C384.065 71.4471 385.333 71.1016 386.613 70.7716M390.447 69.837C391.723 69.5436 393.01 69.2651 394.307 69.0015M398.192 68.2622C399.48 68.0334 400.779 67.8187 402.088 67.6182';
+
+/* ---- 04 · Search ---- */
+const searched = [
+  person(n0, 71.36, 180.1, 28, [10, 7], 20),
+  person(n1, 141.16, 401.47, 28, [10, 7], 20),
+  person(n2, 388, 423.06, 28, [10, 7], 20),
+  person(n3, 206.12, 33.03, 28, [10, 7], 20),
+  person(n4, 135.17, 285.99, 32, [10, 7], 20),
+  person(n5, 161.56, 136.3, 32, [10, 7], 20),
+  person(n6, 430, 234, 32, [10, 7], 20),
+];
+const searchRahulP = person(searchRahul, 365.58, 108.22, 44, [10, 7], 20);
+const leoP = person(leo, 462.14, 129.31, 52, [10, 7], 20);
+const WARM = { you: [294, 250], rahul: [387.58, 130.22], leo: [488.14, 155.31] };
+const query = 'Top robotics founders in SF who are hiring';
+
+const shotStyle = (p: Person) => `left:${-p.pad[0]}px;top:${-p.pad[1]}px;width:${p.size + p.grow}px`;
+const spot = (p: { x: number; y: number }, size: number) => `left:${p.x}px;top:${p.y}px;width:${size}px;height:${size}px`;
+---
+
+{/* 02 · Happenstance maps your network */}
+<div class="frame nv" data-frame="1" data-step-visual="map" role="img" aria-label={labels[0]}>
+  <div class="nv-stage" aria-hidden="true">
+    <img class="nv-map" src={mapDots} alt="" width="586.5" height="560" loading="lazy" data-map />
+    <svg class="nv-svg" viewBox="0 0 586.5 560" width="586.5" height="560">
+      <defs>
+        <mask id="nv-map-reveal" maskUnits="userSpaceOnUse" x="0" y="0" width="586.5" height="560">
+          <circle class="nv-reveal" cx={MAP_YOU.x} cy={MAP_YOU.y} r="470" fill="#fff" data-reveal />
+        </mask>
+      </defs>
+      <g mask="url(#nv-map-reveal)" fill="none" set:html={mapLines} />
+    </svg>
+
+    {
+      mapPeople.map((p) => (
+        <span class="nv-person" style={spot(p, p.size)} data-person {...{ 'data-cx': p.x + p.size / 2, 'data-cy': p.y + p.size / 2 }}>
+          <Image class="nv-shot" src={p.src} alt="" width={p.size + p.grow} densities={[1, 2]} style={shotStyle(p)} loading="lazy" />
+        </span>
+      ))
+    }
+    <img class="nv-halo" src={halo} alt="" width="76" height="76" style="left:62px;top:168px" data-halo />
+    <span class="nv-person" style="left:74px;top:180px;width:52px;height:52px" data-you>
+      <Image class="nv-shot" src={mapYou} alt="" width={90} densities={[1, 2]} style="left:-19px;top:-11px;width:90px" loading="lazy" />
+    </span>
+
+    {
+      mapGroups.map((g) => (
+        <span class:list={['nv-pill', { raised: g.raised }]} style={`left:${g.x}px;top:${g.y}px`} data-pill>
+          <i style={`background:${g.color}`} />
+          <b>{g.name}</b>
+          <em data-count>{g.count}</em>
+        </span>
+      ))
+    }
+    <span class="nv-pill raised nv-total" style="left:28px;top:242px" data-pill>
+      <strong data-count>178,683</strong> connections
+    </span>
+
+    <div class="nv-legend" data-legend>
+      <span class="nv-legend-label">Ranked by how well you know each person</span>
+      {
+        strengths.map((s) => (
+          <span class="nv-strength" style={`color:${s.color}`}>
+            <span class="nv-bars">
+              {s.bars.map((c, i) => (
+                <i style={`background:${c};height:${6 + i * 3}px`} data-bar />
+              ))}
+            </span>
+            {s.label}
+          </span>
+        ))
+      }
+    </div>
+  </div>
+</div>
+
+{/* 03 · Add friends, join groups */}
+<div class="frame nv" data-frame="2" data-step-visual="friends" role="img" aria-label={labels[1]}>
+  <div class="nv-stage" aria-hidden="true">
+    <img class="nv-glow" src={glow} alt="" width="300" height="300" style="left:143.5px;top:100px" data-glow />
+    <img class="nv-ring" src={ring1} alt="" width="176" height="176" style="left:205.5px;top:162px" data-ring />
+    <img class="nv-ring" src={ring2} alt="" width="304" height="304" style="left:141.5px;top:98px" data-ring />
+    <Image class="nv-ring" src={ring3} alt="" width={432} densities={[1, 2]} style="left:77.5px;top:34px" data-ring loading="lazy" />
+
+    <svg class="nv-svg" viewBox="0 0 587 560" width="587" height="560">
+      <defs>
+        <mask id="nv-warm-reveal" maskUnits="userSpaceOnUse" x="0" y="0" width="587" height="560">
+          <circle class="nv-reveal" cx="293.5" cy="162" r="160" fill="#fff" data-reveal />
+        </mask>
+      </defs>
+      {
+        spokes.map(([x, y], i) => (
+          <path
+            class:list={['nv-spoke', { 'is-warm': i === 0 }]}
+            d={`M${HUB.x} ${HUB.y}L${x} ${y}`}
+            pathLength="100"
+            data-spoke
+          />
+        ))
+      }
+      <path class="nv-dashed" d={SARAH_TO_MAYA} mask="url(#nv-warm-reveal)" />
+    </svg>
+
+    {
+      secondDegree.map((p) => (
+        <span class="nv-person nv-2nd" style={spot(p, 28)} data-second {...{ 'data-cx': p.x + 14, 'data-cy': p.y + 14 }}>
+          <Image class="nv-photo" src={p.src} alt="" width={28} densities={[1, 2]} loading="lazy" />
+        </span>
+      ))
+    }
+    {
+      members.map((p) => (
+        <span class="nv-person" style={spot(p, p.size)} data-member {...{ 'data-cx': p.x + p.size / 2, 'data-cy': p.y + p.size / 2 }}>
+          <Image class="nv-shot" src={p.src} alt="" width={p.size + p.grow} densities={[1, 2]} style={shotStyle(p)} loading="lazy" />
+        </span>
+      ))
+    }
+    {
+      friends.map((p) => (
+        <span class="nv-person" style={spot(p, p.size)} data-friend {...{ 'data-cx': p.x + p.size / 2, 'data-cy': p.y + p.size / 2 }}>
+          <Image class="nv-shot" src={p.src} alt="" width={68} densities={[1, 2]} style={shotStyle(p)} loading="lazy" />
+        </span>
+      ))
+    }
+    <span class="nv-add" style="left:193.29px;top:270px" data-add>
+      <img src={plus} alt="" width="16" height="16" />
+    </span>
+    <span class="nv-person" style="left:387.96px;top:46.82px;width:40px;height:40px" data-target>
+      <Image class="nv-shot" src={maya} alt="" width={72} densities={[1, 2]} style="left:-16px;top:-16px;width:72px" loading="lazy" />
+    </span>
+    <span class="nv-person" style="left:255.5px;top:212px;width:76px;height:76px" data-you>
+      <Image class="nv-shot" src={ringYou} alt="" width={138} densities={[1, 2]} style="left:-31px;top:-31px;width:138px" loading="lazy" />
+    </span>
+
+    {
+      friendGroups.map((g) => (
+        <span class="nv-pill nv-pill-sm" style={`left:${g.x}px;top:${g.y}px`} data-pill>
+          <i style={`background:${g.color}`} />
+          <b>{g.name}</b>
+          <em data-count>{g.count}</em>
+        </span>
+      ))
+    }
+    <span class="nv-tip" style="left:438px;top:42px" data-tip>
+      <b>Maya Chen</b>
+      <span>Figma · via Sarah</span>
+    </span>
+
+    <div class="nv-legend" data-legend>
+      <span class="nv-legend-label">Your network, plus theirs</span>
+      <span class="nv-key"><img src={pulse} alt="" width="8" height="8" />Friends <strong data-count>12</strong></span>
+      <span class="nv-key"><img src={pulse} alt="" width="8" height="8" />Groups <strong data-count>3</strong></span>
+      <span class="nv-key">
+        <Image src={dot2nd} alt="" width={10} densities={[1, 2]} loading="lazy" />2nd degree <strong data-count>18.4k</strong>
+      </span>
+    </div>
+  </div>
+</div>
+
+{/* 04 · Search for anyone */}
+<div class="frame nv" data-frame="3" data-step-visual="search" role="img" aria-label={labels[2]}>
+  <div class="nv-stage" aria-hidden="true">
+    <img class="nv-glow" src={glow} alt="" width="300" height="300" style="left:143.5px;top:100px" data-glow />
+    <img class="nv-ring" src={ring1} alt="" width="176" height="176" style="left:205.5px;top:162px" />
+    <img class="nv-ring" src={ring2} alt="" width="304" height="304" style="left:141.5px;top:98px" />
+    <Image class="nv-ring" src={ring3} alt="" width={432} densities={[1, 2]} style="left:77.5px;top:34px" loading="lazy" />
+    <span class="nv-sonar" style="left:77.5px;top:34px" data-sonar></span>
+
+    <svg class="nv-svg" viewBox="0 0 587 560" width="587" height="560">
+      <path class="nv-warm" d={`M${WARM.you.join(' ')}L${WARM.rahul.join(' ')}`} pathLength="100" data-warm />
+      <path class="nv-warm" d={`M${WARM.rahul.join(' ')}L${WARM.leo.join(' ')}`} pathLength="100" data-warm />
+      <path
+        class="nv-flow"
+        d={`M${WARM.you.join(' ')}L${WARM.rahul.join(' ')}L${WARM.leo.join(' ')}`}
+        pathLength="100"
+        data-flow
+      />
+    </svg>
+
+    {
+      searched.map((p) => (
+        <span class="nv-person nv-searched" style={spot(p, p.size)} data-searched {...{ 'data-cx': p.x + p.size / 2, 'data-cy': p.y + p.size / 2 }}>
+          <Image class="nv-shot" src={p.src} alt="" width={p.size + p.grow} densities={[1, 2]} style={shotStyle(p)} loading="lazy" />
+        </span>
+      ))
+    }
+    <span class="nv-person" style={spot(searchRahulP, 44)} data-hop>
+      <Image class="nv-shot" src={searchRahulP.src} alt="" width={64} densities={[1, 2]} style={shotStyle(searchRahulP)} loading="lazy" />
+    </span>
+    <span class="nv-person" style={spot(leoP, 52)} data-hop>
+      <Image class="nv-shot" src={leoP.src} alt="" width={72} densities={[1, 2]} style={shotStyle(leoP)} loading="lazy" />
+    </span>
+    <span class="nv-person" style="left:256px;top:212px;width:76px;height:76px" data-you>
+      <Image class="nv-shot" src={ringYou} alt="" width={138} densities={[1, 2]} style="left:-31px;top:-31px;width:138px" loading="lazy" />
+    </span>
+
+    <span class="nv-query" data-query>
+      <img src={searchIcon} alt="" width="14" height="14" />
+      <span data-query-text>{query}</span><span class="nv-caret" data-caret></span>
+    </span>
+    <span class="nv-result" data-result>
+      <Image src={leoAvatar} alt="" width={32} densities={[1, 2]} loading="lazy" />
+      <span class="nv-result-text">
+        <span class="nv-result-name"><b>Leo Martins</b><em>via Rahul Mehta</em></span>
+        <span class="nv-result-role">Co-Founder &amp; CEO · Arcline Robotics</span>
+      </span>
+    </span>
+
+    <div class="nv-legend" data-legend>
+      <span class="nv-legend-label">Every result comes with a warm path in</span>
+      <span class="nv-key"><img src={pulse} alt="" width="8" height="8" />Searched <strong data-count>18.4k</strong></span>
+      <span class="nv-key"><img src={pulse} alt="" width="8" height="8" />Warm path <strong>2 hops</strong></span>
+    </div>
+  </div>
+</div>
+
+<style>
+  .nv {
+    overflow: hidden;
+    background: linear-gradient(#f9fafc, #fff);
+  }
+
+  /* Figma's 586.5 × 560 frame, centred and scaled with the visual box (same fit as step 1). */
+  .nv-stage {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 587px;
+    height: 560px;
+    translate: -50% -50%;
+    scale: var(--cx-fit, 1);
+  }
+
+  .nv-stage > * {
+    position: absolute;
+  }
+
+  .nv-map {
+    top: 14px;
+    left: 0;
+    width: 586.5px;
+    height: 560px;
+  }
+
+  .nv-svg {
+    inset: 0;
+    overflow: visible;
+  }
+
+  .nv-reveal {
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  .nv-person {
+    display: block;
+  }
+
+  .nv-shot {
+    position: absolute;
+    max-width: none;
+    height: auto;
+  }
+
+  .nv-photo {
+    width: 100%;
+    height: 100%;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    object-fit: cover;
+    box-shadow: 0 4px 10px -4px rgba(15, 23, 41, 0.25);
+  }
+
+  .nv-2nd {
+    opacity: 0.8;
+  }
+
+  .nv-halo,
+  .nv-glow,
+  .nv-ring {
+    transform-origin: center;
+  }
+
+  /* Group pills, connection count, tooltip */
+  .nv-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px 8px 10px;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 8px 20px -4px rgba(15, 23, 41, 0.08), 0 1px 2px rgba(15, 23, 41, 0.06);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .nv-pill.raised {
+    box-shadow: 0 8px 20px -4px rgba(15, 23, 41, 0.12), 0 1px 6px rgba(15, 23, 41, 0.08);
+  }
+
+  .nv-pill-sm {
+    padding: 7px 10px;
+  }
+
+  .nv-pill i {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+
+  .nv-pill b {
+    font-size: 13px;
+    font-weight: 500;
+    color: #0a0a0a;
+  }
+
+  .nv-pill em {
+    font-size: 12px;
+    font-style: normal;
+    color: #8a8f9c;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .nv-pill-sm em {
+    color: #666b78;
+  }
+
+  .nv-total {
+    font-size: 12px;
+    font-weight: 400;
+    color: #55596a;
+  }
+
+  .nv-total strong {
+    font-weight: 600;
+    color: #0a0a0a;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .nv-tip {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    background: #fff;
+    box-shadow: 0 8px 20px -4px rgba(15, 23, 41, 0.08), 0 1px 2px rgba(15, 23, 41, 0.06);
+    white-space: nowrap;
+  }
+
+  .nv-tip b {
+    font-size: 13px;
+    font-weight: 600;
+    color: #0a0a0a;
+  }
+
+  .nv-tip span {
+    font-size: 12px;
+    color: #55596a;
+  }
+
+  /* Legend bar */
+  .nv-legend {
+    top: 495px;
+    left: 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 539px;
+    height: 39px;
+    padding: 0 16px;
+    border-radius: 8px;
+    background: #f5f5f5;
+    font-size: 12px;
+    font-weight: 500;
+    color: #55596a;
+    white-space: nowrap;
+  }
+
+  .nv-legend-label {
+    flex: 1;
+  }
+
+  .nv-strength,
+  .nv-key {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .nv-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 12px;
+  }
+
+  .nv-bars i {
+    width: 3px;
+    border-radius: 1.5px;
+    transform-origin: 50% 100%;
+  }
+
+  .nv-key strong {
+    font-weight: 600;
+    color: #0a0a0a;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* 03: spokes, warm path to Maya, add-friend button */
+  .nv-spoke {
+    fill: none;
+    stroke: #243755;
+    stroke-opacity: 0.14;
+    stroke-linecap: round;
+  }
+
+  .nv-spoke.is-warm {
+    stroke: #3d85f7;
+    stroke-opacity: 1;
+    stroke-width: 1.5;
+  }
+
+  .nv-dashed {
+    fill: none;
+    stroke: #3d85f7;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+  }
+
+  .nv-add {
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    border: 1.5px dashed #3d85f7;
+    border-radius: 50%;
+    background: #fff;
+  }
+
+  /* 04: sonar sweep, warm path, query, result */
+  .nv-sonar {
+    width: 432px;
+    height: 432px;
+    border: 1.5px solid rgba(61, 133, 247, 0.5);
+    border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(61, 133, 247, 0) 70%, rgba(61, 133, 247, 0.1));
+    opacity: 0;
+  }
+
+  .nv-searched {
+    opacity: 0.45;
+  }
+
+  .nv-warm {
+    fill: none;
+    stroke: #3d85f7;
+    stroke-width: 2;
+    stroke-linecap: round;
+  }
+
+  .nv-flow {
+    fill: none;
+    stroke: #8fc0ff;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-dasharray: 10 200;
+    stroke-dashoffset: 10;
+    opacity: 0;
+    filter: drop-shadow(0 0 3px #3d85f7);
+  }
+
+  .nv-query {
+    top: 318px;
+    left: 293px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 2px 4px rgba(36, 55, 85, 0.07);
+    font-size: 13px;
+    font-weight: 500;
+    color: #0a0a0a;
+    white-space: nowrap;
+    translate: -50% 0;
+  }
+
+  .nv-caret {
+    width: 1.5px;
+    height: 14px;
+    margin-left: -11px;
+    background: #3d85f7;
+    opacity: 0;
+  }
+
+  .nv-result {
+    top: 40px;
+    left: 287px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px 10px 10px;
+    border-radius: 6px;
+    background: #fff;
+    box-shadow: 0 8px 20px -4px rgba(15, 23, 41, 0.08), 0 1px 2px rgba(15, 23, 41, 0.06);
+    white-space: nowrap;
+  }
+
+  .nv-result img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+  }
+
+  .nv-result-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .nv-result-name {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .nv-result-name b {
+    font-size: 13px;
+    font-weight: 600;
+    color: #0a0a0a;
+  }
+
+  .nv-result-name em {
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 500;
+    color: #2563eb;
+  }
+
+  .nv-result-role {
+    font-size: 12px;
+    color: #55596a;
+  }
+</style>

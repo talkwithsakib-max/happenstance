@@ -14,8 +14,8 @@ const slotFor = (i: number) => {
 };
 ---
 
-<section class="testimonials" aria-roledescription="carousel" aria-label="What people say about Happenstance">
-  <div class="viewport">
+<section class="testimonials" aria-roledescription="carousel" aria-label="What people say about Happenstance" data-motion>
+  <div class="viewport m-hide">
     <div class="stage" data-carousel data-fit="1440" data-active={initialTestimonial}>
       <img class="link link-l2" src={linkShort} alt="" />
       <img class="link link-l1" src={linkLong} alt="" />
@@ -56,7 +56,7 @@ const slotFor = (i: number) => {
     </div>
   </div>
 
-  <div class="pager" role="tablist" aria-label="Choose a testimonial">
+  <div class="pager m-hide" role="tablist" aria-label="Choose a testimonial">
     {
       testimonials.map((t, i) => (
         <button
@@ -66,13 +66,25 @@ const slotFor = (i: number) => {
           data-goto={i}
           aria-selected={i === initialTestimonial ? 'true' : 'false'}
           aria-label={t.name}
-        />
+        >
+          <span class="dot-fill" />
+        </button>
       ))
     }
   </div>
+
+  <script is:inline>
+    // Lets the carousel fade in and auto-advance only when motion is allowed.
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) document.currentScript.parentElement.dataset.motion = 'pending';
+  </script>
 </section>
 
 <script>
+  import { createSequence, onFirstView, reducedMotion, EASE_OUT } from '../scripts/motion';
+
+  // How long each testimonial stays up before the next one (Calendly uses about six seconds).
+  const INTERVAL_MS = 6000;
+
   const root = document.querySelector<HTMLElement>('.testimonials');
   const stage = root?.querySelector<HTMLElement>('[data-carousel]');
 
@@ -80,15 +92,49 @@ const slotFor = (i: number) => {
     const cards = [...stage.querySelectorAll<HTMLElement>('[data-card]')];
     const dots = [...root.querySelectorAll<HTMLButtonElement>('.dot')];
     const count = cards.length;
+    const animate = !reducedMotion() && root.dataset.motion === 'pending';
     let active = Number(stage.dataset.active) || 0;
+    let started = false;
+    let timer: Animation | null = null;
+    const holds = new Set<string>();
 
-    const render = () => {
+    const offsetOf = (i: number) => {
+      let offset = (i - active + count) % count;
+      if (offset > count / 2) offset -= count;
+      return offset;
+    };
+
+    // A card that wraps from one end to the other leaves off its edge and re-enters from the
+    // opposite edge, instead of sliding across the whole stage behind the others.
+    const wrapCard = (card: HTMLElement, to: number) => {
+      const dir = to > 0 ? 1 : -1;
+      const out = card.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: `translateX(${-dir * 48}px)` }], {
+        duration: 260,
+        easing: 'ease-in',
+        fill: 'forwards',
+      });
+      out.finished.then(() => {
+        card.classList.add('is-wrapping');
+        card.dataset.slot = String(to);
+        void card.offsetWidth; // jump to the new slot without the slide transition
+        card.classList.remove('is-wrapping');
+        out.cancel();
+        card.animate([{ opacity: 0, transform: `translateX(${dir * 48}px)` }, { opacity: 1, transform: 'none' }], {
+          duration: 520,
+          delay: 160,
+          easing: EASE_OUT,
+          fill: 'backwards',
+        });
+      }, () => {});
+    };
+
+    const render = (animateWrap = false) => {
       cards.forEach((card, i) => {
-        let offset = (i - active + count) % count;
-        if (offset > count / 2) offset -= count;
-        card.dataset.slot = String(offset);
-        card.setAttribute('aria-hidden', offset === 0 ? 'false' : 'true');
-        card.querySelector<HTMLElement>('.card-hit')!.tabIndex = -1;
+        const to = offsetOf(i);
+        const from = Number(card.dataset.slot);
+        if (animateWrap && Math.abs(to - from) > 2) wrapCard(card, to);
+        else card.dataset.slot = String(to);
+        card.setAttribute('aria-hidden', to === 0 ? 'false' : 'true');
       });
       dots.forEach((dot, i) => {
         dot.classList.toggle('is-active', i === active);
@@ -96,10 +142,34 @@ const slotFor = (i: number) => {
       });
     };
 
-    const go = (index: number) => {
-      active = (index + count) % count;
-      render();
+    // The active pager pill fills up as a visible timer; when it is full the next card comes in.
+    const startTimer = () => {
+      timer?.cancel();
+      timer = null;
+      if (!animate || !started) return;
+      const fill = dots[active].querySelector<HTMLElement>('.dot-fill')!;
+      timer = fill.animate([{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }], {
+        duration: INTERVAL_MS,
+        easing: 'linear',
+        fill: 'forwards',
+      });
+      timer.onfinish = () => go(active + 1);
+      if (holds.size) timer.pause();
     };
+
+    const hold = (reason: string, on: boolean) => {
+      if (on) holds.add(reason);
+      else holds.delete(reason);
+      if (!timer) return;
+      if (holds.size) timer.pause();
+      else if (timer.playState === 'paused') timer.play();
+    };
+
+    function go(index: number) {
+      active = (index + count) % count;
+      render(true);
+      startTimer();
+    }
 
     root.addEventListener('click', (event) => {
       const target = (event.target as HTMLElement).closest<HTMLElement>('[data-goto]');
@@ -123,6 +193,31 @@ const slotFor = (i: number) => {
     });
 
     render();
+
+    if (animate) {
+      // Pause while someone is reading or using the carousel, and while it is off screen.
+      root.addEventListener('pointerenter', () => hold('hover', true));
+      root.addEventListener('pointerleave', () => hold('hover', false));
+      root.addEventListener('focusin', () => hold('focus', true));
+      root.addEventListener('focusout', (e) => {
+        if (!root.contains(e.relatedTarget as Node)) hold('focus', false);
+      });
+      new IntersectionObserver(([entry]) => hold('offscreen', !entry.isIntersecting)).observe(root);
+
+      // Entrance: the stage and pager fade up when the section first comes into view.
+      const seq = createSequence(root);
+      seq.reset();
+      root.dataset.motion = 'ready';
+      onFirstView(root, () => {
+        root.dataset.motion = 'playing';
+        seq.reveal(root.querySelector('.viewport'), [{ opacity: 0, transform: 'translateY(18px) scale(0.985)' }, { opacity: 1, transform: 'none' }], {
+          duration: 900,
+        });
+        seq.reveal(root.querySelector('.pager'), [{ opacity: 0 }, { opacity: 1 }], { duration: 600, delay: 450 });
+        started = true;
+        startTimer();
+      }, 0.3);
+    }
   }
 </script>
 
@@ -184,13 +279,21 @@ const slotFor = (i: number) => {
     position: absolute;
     overflow: hidden;
     background: var(--surface);
+    /* Calendly-style pacing: one smooth ~0.7s move for every card. */
+    --move: 700ms cubic-bezier(0.65, 0, 0.35, 1);
     transition:
-      left 600ms var(--ease),
-      top 600ms var(--ease),
-      width 600ms var(--ease),
-      height 600ms var(--ease),
-      border-radius 600ms var(--ease),
-      box-shadow 600ms var(--ease);
+      left var(--move),
+      top var(--move),
+      width var(--move),
+      height var(--move),
+      border-radius var(--move),
+      box-shadow var(--move);
+  }
+
+  /* A wrapping card jumps to its new slot while it is invisible. */
+  .card.is-wrapping,
+  .card.is-wrapping .photo {
+    transition: none;
   }
 
   .card[data-slot='-2'],
@@ -252,10 +355,6 @@ const slotFor = (i: number) => {
     box-shadow: 0 28px 32px rgba(51, 46, 115, 0.2);
   }
 
-  .card:not([data-slot='0']):hover .photo img {
-    filter: grayscale(0);
-  }
-
   .photo {
     position: absolute;
     top: 12px;
@@ -265,7 +364,7 @@ const slotFor = (i: number) => {
     overflow: hidden;
     border: 1px solid var(--border-faint);
     border-radius: var(--r-sm);
-    transition: all 600ms var(--ease);
+    transition: all 700ms cubic-bezier(0.65, 0, 0.35, 1);
   }
 
   .card[data-slot='0'] .photo {
@@ -279,8 +378,8 @@ const slotFor = (i: number) => {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    /* Portraits stay black and white in every state, as in Figma. */
     filter: grayscale(1);
-    transition: filter 400ms var(--ease);
   }
 
   .copy {
@@ -295,13 +394,15 @@ const slotFor = (i: number) => {
     padding: 24px 20px 12px 28px;
     opacity: 0;
     visibility: hidden;
-    transition: opacity 300ms var(--ease), visibility 0s 300ms;
+    /* The quote leaves first, before the cards move… */
+    transition: opacity 160ms ease-in, visibility 0s 160ms;
   }
 
   .card[data-slot='0'] .copy {
     opacity: 1;
     visibility: visible;
-    transition: opacity 400ms 250ms var(--ease);
+    /* …and the new one arrives once the centre card has settled. */
+    transition: opacity 420ms 520ms var(--ease);
   }
 
   .headline {
@@ -347,19 +448,23 @@ const slotFor = (i: number) => {
     color: var(--text-strong);
   }
 
-  /* Pager */
+  /* Pager: same indicator as the Network showcase (minus its pause button). */
   .pager {
     display: flex;
     align-items: center;
     gap: 6px;
+    padding: 12px 14px;
+    border-radius: var(--r-sm);
+    background: var(--divider);
   }
 
   .dot {
     position: relative;
-    width: 8px;
-    height: 8px;
-    border-radius: 4px;
-    background: var(--surface);
+    width: 5px;
+    height: 5px;
+    overflow: hidden;
+    border-radius: 2px;
+    background: #a1a6b0;
     transition: width 300ms var(--ease), background-color var(--dur) var(--ease);
   }
 
@@ -370,14 +475,34 @@ const slotFor = (i: number) => {
   }
 
   .dot:not(.is-active):hover {
-    background: #d5d8de;
+    background: var(--text-primary);
   }
 
   .dot.is-active {
-    width: 28px;
-    border-radius: 40px 40px 40px 6px;
-    background: var(--gradient-blue);
-    box-shadow: var(--shadow-blue-inset);
+    width: 52px;
+    height: 4px;
+    background: #d5d8de;
+  }
+
+  /* The dark fill doubles as the auto-advance timer (it grows from left to right). Without
+     motion it simply stays full. */
+  .dot-fill {
+    position: absolute;
+    inset: 0;
+    border-radius: 2px;
+    background: var(--text-primary);
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+    pointer-events: none;
+  }
+
+  .dot.is-active .dot-fill {
+    transform: scaleX(1);
+  }
+
+  .testimonials[data-motion='ready'] .dot.is-active .dot-fill,
+  .testimonials[data-motion='playing'] .dot.is-active .dot-fill {
+    transform: scaleX(0);
   }
 
   /* Below desktop: show the centred card only, stacked, so text stays legible. */

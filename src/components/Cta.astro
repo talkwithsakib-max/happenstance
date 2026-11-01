@@ -27,13 +27,13 @@ const highlights = [
     {
       highlights.map((h, i) => (
         <div class="highlight" style={`left:${h.left}px;top:${h.top}px;--line:${h.line}px;--delay:${i * 0.8}s`} aria-hidden="true">
-          <img class="glow" src={glow} alt="" />
-          <span class="line" />
-          <span class="avatar">
+          <img class="glow m-hide" src={glow} alt="" />
+          <span class="line m-hide" />
+          <span class="avatar m-hide">
             <Image src={h.avatar} alt="" width={50} height={50} densities={[1, 2]} loading="lazy" />
           </span>
-          <img class="dot" src={dot} alt="" width="7" height="7" />
-          <span class="tag" style={`left:${h.tagX}px`}>
+          <img class="dot m-hide" src={dot} alt="" width="7" height="7" />
+          <span class="tag m-hide" style={`left:${h.tagX}px`}>
             <span class="tag-icon">
               {h.svg ? (
                 <img src={h.svg} alt="" width="8.333" height="8.333" />
@@ -41,7 +41,10 @@ const highlights = [
                 <Image src={h.icon!} alt="" width={24} style={`width:8.35px;height:${h.iconH}px`} />
               )}
             </span>
-            {h.label}
+            <span class="tag-text">
+              <span data-type={h.label}>{h.label}</span>
+              <span class="tag-caret" />
+            </span>
           </span>
         </div>
       ))
@@ -59,12 +62,62 @@ const highlights = [
       </div>
     </div>
   </div>
+
+  <script is:inline>
+    // Lets the highlights rise in one by one only when motion is allowed.
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) document.currentScript.parentElement.dataset.motion = 'pending';
+  </script>
 </section>
+
+<script>
+  import { createSequence, onFirstView, reducedMotion, pop, EASE_SETTLE, EASE_IN_OUT } from '../scripts/motion';
+
+  // The three highlights rise in one after another when the section first comes into view:
+  // the avatar lifts up, its line grows up to the tag, and the tag's label types itself out.
+  const root = document.querySelector<HTMLElement>('.cta');
+
+  if (root && root.dataset.motion === 'pending' && !reducedMotion()) {
+    const seq = createSequence(root);
+    seq.reset();
+    root.dataset.motion = 'ready';
+
+    const rise = (h: HTMLElement) => {
+      const $ = (sel: string) => h.querySelector<HTMLElement>(sel);
+      const tag = $('.tag')!;
+      const text = $('[data-type]')!;
+      seq.reveal($('.glow'), [{ opacity: 0, transform: 'scale(0.6)' }, { opacity: 1, transform: 'none' }], { duration: 900 });
+      seq.reveal($('.avatar'), [{ opacity: 0, transform: 'translateY(28px) scale(0.92)' }, { opacity: 1, transform: 'none' }], {
+        duration: 780,
+        easing: EASE_SETTLE,
+      });
+      seq.reveal($('.dot'), pop, { duration: 320, delay: 380 });
+      seq.reveal($('.line'), [{ transform: 'scaleY(0)' }, { transform: 'none' }], { duration: 460, delay: 440, easing: EASE_IN_OUT });
+      seq.reveal(tag, [{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'none' }], { duration: 520, delay: 800 });
+      (async () => {
+        await seq.wait(980);
+        tag.classList.add('is-typing');
+        await seq.typeText(text, text.dataset.type!, 30);
+        await seq.wait(600);
+        tag.classList.remove('is-typing');
+      })().catch(() => {});
+    };
+
+    onFirstView(root.querySelector('.frame')!, async () => {
+      root.dataset.motion = 'playing';
+      try {
+        for (const h of root.querySelectorAll<HTMLElement>('.highlight')) {
+          rise(h);
+          await seq.wait(900);
+        }
+      } catch {}
+    });
+  }
+</script>
 
 <style>
   .cta {
     overflow: hidden;
-    background: var(--bg-soft);
+    background: var(--bg-page);
   }
 
   .frame {
@@ -86,6 +139,8 @@ const highlights = [
   .wall img {
     width: 100%;
     height: 100%;
+    /* The export has a light backdrop; darken drops it onto the page colour without a box. */
+    mix-blend-mode: darken;
   }
 
   .highlight {
@@ -117,6 +172,7 @@ const highlights = [
     width: 1.5px;
     height: var(--line);
     background: linear-gradient(180deg, rgba(30, 130, 224, 0.3), #1c38ea);
+    transform-origin: 50% 100%;
   }
 
   .avatar {
@@ -160,6 +216,32 @@ const highlights = [
     font-weight: 500;
     color: #fff;
     white-space: nowrap;
+  }
+
+  .tag-text {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  /* While the label types, a caret follows it, like the hero's search field. */
+  .tag-caret {
+    display: none;
+    width: 1.5px;
+    height: 12px;
+    margin-left: 1px;
+    border-radius: 1px;
+    background: #fff;
+  }
+
+  .tag.is-typing .tag-caret {
+    display: block;
+    animation: caret-blink 900ms steps(1) infinite;
+  }
+
+  @keyframes caret-blink {
+    50% {
+      opacity: 0;
+    }
   }
 
   .tag-icon {

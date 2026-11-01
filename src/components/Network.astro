@@ -1,39 +1,31 @@
 ---
-import { Image } from 'astro:assets';
 import SectionHeading from './SectionHeading.astro';
-
-import step1 from '../assets/network/step-1.png';
-import step2 from '../assets/network/step-2.png';
-import step3 from '../assets/network/step-3.png';
-import step4 from '../assets/network/step-4.png';
+import NetworkConnect from './NetworkConnect.astro';
+import NetworkVisuals from './NetworkVisuals.astro';
 
 const steps = [
   {
     title: 'Connect your accounts',
     short: 'Gmail, Calendar, LinkedIn, X, and more.',
     long: 'Gmail, Calendar, LinkedIn, X, and more. Happenstance reads who you’ve emailed, met and followed, so nobody you know gets left out.',
-    image: step1,
     alt: 'Gmail, Calendar, X, LinkedIn and Outlook connect to your profile, adding thousands of people',
   },
   {
     title: 'Happenstance maps your network',
     short: 'Ranked by how well you know each person.',
     long: 'Everyone you know is grouped by team, company and community, then ranked by how well you actually know them, wherever they are in the world.',
-    image: step2,
     alt: 'A world map of 178,683 connections grouped into communities and ranked by closeness',
   },
   {
     title: 'Add friends, join groups',
     short: 'Search your networks’ networks.',
     long: 'Invite friends and join groups like your alumni network or YC batch. Their connections become searchable too, so you can find people two hops away.',
-    image: step3,
     alt: 'Your friends and groups expand your reach to 18.4k second-degree connections',
   },
   {
     title: 'Search for anyone',
     short: 'Every result comes with a warm path in.',
     long: 'Describe who you need in plain English. Every result shows the warmest path in, through someone you already know.',
-    image: step4,
     alt: 'Searching “Top robotics founders in SF who are hiring” finds Leo Martins via Rahul Mehta',
   },
 ];
@@ -92,24 +84,16 @@ const steps = [
     </ol>
 
     <div class="visual">
-      {
-        steps.map((step, i) => (
-          <Image
-            class:list={['frame', { 'is-active': i === 0, contain: i > 0 }]}
-            src={step.image}
-            alt={step.alt}
-            data-frame={i}
-            widths={i === 0 ? [650, 1300] : [555, 1109]}
-            sizes={i === 0 ? '(max-width: 1100px) 100vw, 650px' : '(max-width: 1100px) 100vw, 555px'}
-            loading="lazy"
-          />
-        ))
-      }
+      <NetworkConnect label={steps[0].alt} active />
+      <NetworkVisuals labels={steps.slice(1).map((s) => s.alt)} />
     </div>
   </div>
 </section>
 
 <script>
+  import { initConnect } from '../scripts/network-connect';
+  import { initMap, initFriends, initSearch } from '../scripts/network-steps';
+
   document.querySelectorAll<HTMLElement>('[data-showcase]').forEach((root) => {
     const steps = [...root.querySelectorAll<HTMLElement>('.step')];
     const frames = [...root.querySelectorAll<HTMLElement>('[data-frame]')];
@@ -119,8 +103,24 @@ const steps = [
     const interval = Number(root.dataset.interval) || 6000;
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+    const frameEl = (i: number) => root.querySelector<HTMLElement>(`[data-frame="${i}"]`)!;
+    const players = reduceMotion
+      ? []
+      : [initConnect(frameEl(0)), initMap(frameEl(1)), initFriends(frameEl(2)), initSearch(frameEl(3))];
+    const visual = root.querySelector<HTMLElement>('.visual')!;
+
     let current = 0;
     let paused = reduceMotion;
+    let onscreen = false;
+
+    // The step visuals are live HTML at Figma's size; scale them to the visual box on smaller screens.
+    new ResizeObserver(() => {
+      const fit = Math.min(visual.clientWidth / 650, visual.clientHeight / 560);
+      visual.style.setProperty('--cx-fit', String(Math.min(1, fit)));
+    }).observe(visual);
+
+    // Each step's animation runs only while that step is showing and on screen.
+    const syncPlayers = () => players.forEach((p, i) => p.toggle(i === current && onscreen));
     root.style.setProperty('--step-duration', `${interval}ms`);
 
     const restartFill = () => {
@@ -141,6 +141,7 @@ const steps = [
       });
       steps[current].prepend(controls);
       restartFill();
+      syncPlayers();
     };
 
     const setPaused = (value: boolean) => {
@@ -165,7 +166,11 @@ const steps = [
     pauseBtn.addEventListener('click', () => setPaused(!paused));
 
     // Only run the timer while the showcase is on screen.
-    new IntersectionObserver(([entry]) => root.classList.toggle('is-offscreen', !entry.isIntersecting)).observe(root);
+    new IntersectionObserver(([entry]) => {
+      onscreen = entry.isIntersecting;
+      root.classList.toggle('is-offscreen', !onscreen);
+      syncPlayers();
+    }).observe(root);
 
     setPaused(paused);
   });
@@ -381,13 +386,28 @@ const steps = [
     flex: 0 0 650px;
     height: 560px;
     overflow: hidden;
-    border: 1px solid var(--surface);
     border-radius: var(--r-xl);
     background: #fbfbfc;
     box-shadow: var(--shadow-card);
   }
 
-  .frame {
+  /* Frame border as an overlay, so the step 1 watercolor can run edge to edge without it. */
+  .visual::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    border: 1px solid var(--surface);
+    border-radius: inherit;
+    pointer-events: none;
+    transition: opacity 500ms var(--ease);
+  }
+
+  .visual:has(:global(.cx.is-active))::after {
+    opacity: 0;
+  }
+
+  .visual :global(.frame) {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -398,11 +418,7 @@ const steps = [
     transition: opacity 500ms var(--ease), transform 700ms var(--ease);
   }
 
-  .frame.contain {
-    object-fit: contain;
-  }
-
-  .frame.is-active {
+  .visual :global(.frame.is-active) {
     opacity: 1;
     transform: none;
   }

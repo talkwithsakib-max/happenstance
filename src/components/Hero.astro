@@ -2,6 +2,8 @@
 import { Image } from 'astro:assets';
 import SendButton from './SendButton.astro';
 import StrengthMeter from './StrengthMeter.astro';
+import ThinkingBot from './ThinkingBot.astro';
+import BotMark from './BotMark.astro';
 
 import grain from '../assets/hero/grain.png';
 import etching from '../assets/hero/etching.png';
@@ -20,7 +22,6 @@ import calendar from '../assets/icons/calendar.png';
 import linkedin from '../assets/icons/linkedin.svg?url';
 import x from '../assets/icons/x.svg?url';
 import outlook from '../assets/icons/outlook.svg?url';
-import flower from '../assets/icons/flower.svg?url';
 import connectors from '../assets/hero/connectors.svg?url';
 import pulses from '../assets/hero/flow-pulses.svg?url';
 import contactShadow from '../assets/hero/contact-shadow.svg?url';
@@ -84,6 +85,7 @@ const paths = [
       people who can refer you.
     </p>
 
+    <div class="prompt-wrap">
     <div class="prompt" data-prompt>
       <p class="prompt-text display">
         <span class="prompt-typed" data-typed>Who do I know at Meta from my school?</span><span
@@ -92,6 +94,8 @@ const paths = [
       </p>
       <div class="prompt-actions"><SendButton label="Replay the search demo" /></div>
       <span class="prompt-progress" aria-hidden="true"></span>
+    </div>
+    <ThinkingBot tone="pill" class="prompt-think" />
     </div>
   </div>
 
@@ -127,7 +131,7 @@ const paths = [
         <img class="ring" src={ring} alt="" />
         <img class="plate" src={plate} alt="" />
         <Image class="you-photo" src={you} alt="" width={104} height={104} densities={[1, 2]} />
-        <span class="you-badge"><img src={flower} alt="" width="20" height="20" /></span>
+        <span class="you-badge"><BotMark size={22} /></span>
       </div>
       <p class="you-caption intro-hide">You · <span data-count-to="1284">1,284</span> people mapped</p>
 
@@ -166,7 +170,8 @@ const paths = [
     margin-top: -64px;
     padding-top: 125px;
     padding-bottom: 49px;
-    background: var(--bg-soft);
+    /* Same as the page behind the sections below, so there is no seam at the hero's edge. */
+    background: var(--bg-page);
     overflow: hidden;
   }
 
@@ -264,10 +269,8 @@ const paths = [
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    width: 525px;
-    max-width: 100%;
+    width: 100%;
     height: 96px;
-    margin-top: 16px;
     border-radius: var(--r-lg);
     background: var(--surface);
     box-shadow: 0 18px 48px -20px rgba(36, 55, 85, 0.3), 0 2px 4px 0 rgba(36, 55, 85, 0.07);
@@ -313,6 +316,22 @@ const paths = [
     display: flex;
     justify-content: flex-end;
     padding: 12px;
+  }
+
+  /* Thinking bot in the prompt's lower-left corner while the search runs. */
+  /* Wraps the prompt so the thinking bot can sit just below it, above the result panel. */
+  .prompt-wrap {
+    position: relative;
+    z-index: 3;
+    width: 525px;
+    max-width: 100%;
+    margin-top: 16px;
+  }
+
+  .prompt-wrap :global(.prompt-think) {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 0;
   }
 
   /* Thin "searching" sweep along the bottom edge of the prompt. */
@@ -424,9 +443,10 @@ const paths = [
     text-transform: capitalize;
   }
 
+  /* Centred with `translate` (not `transform`) so the intro's fade-up can't override it. */
   .label-map {
     left: 414px;
-    transform: translateX(-50%);
+    translate: -50% 0;
   }
 
   .label-paths {
@@ -539,7 +559,7 @@ const paths = [
     position: absolute;
     left: 414px;
     top: 318px;
-    transform: translateX(-50%);
+    translate: -50% 0;
     font-size: 12px;
     font-weight: 500;
     letter-spacing: -0.06px;
@@ -715,6 +735,7 @@ const paths = [
     .paths {
       position: static;
       transform: none;
+      translate: none;
     }
 
     .sources {

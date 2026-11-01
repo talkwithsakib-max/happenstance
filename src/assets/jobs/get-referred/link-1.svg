@@ -1,0 +1,31 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="56" height="104" viewBox="0 0 56 104" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Link" clip-path="url(#clip0_0_20)">
+<rect id="Line" x="-23.5" y="51" width="116" height="2" fill="#2F62D9" fill-opacity="0.9"/>
+<g id="Glow" filter="url(#filter0_f_0_20)">
+<rect x="10" y="50.5" width="18" height="3" rx="1.5" fill="#1C38EA" fill-opacity="0.7"/>
+</g>
+<g id="Dot" filter="url(#filter1_d_0_20)">
+<circle cx="48" cy="52" r="6" fill="white"/>
+</g>
+<circle id="Dot Core" cx="48" cy="52" r="2.5" fill="#1C38EA"/>
+</g>
+<defs>
+<filter id="filter0_f_0_20" x="8" y="48.5" width="22" height="7" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="1" result="effect1_foregroundBlur_0_20"/>
+</filter>
+<filter id="filter1_d_0_20" x="39" y="44" width="18" height="18" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+<feOffset dy="1"/>
+<feGaussianBlur stdDeviation="1.5"/>
+<feColorMatrix type="matrix" values="0 0 0 0 0.141176 0 0 0 0 0.215686 0 0 0 0 0.333333 0 0 0 0.12 0"/>
+<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_0_20"/>
+<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_0_20" result="shape"/>
+</filter>
+<clipPath id="clip0_0_20">
+<rect width="56" height="104" fill="white"/>
+</clipPath>
+</defs>
+</svg>

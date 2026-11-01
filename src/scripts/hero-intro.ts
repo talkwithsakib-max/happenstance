@@ -6,6 +6,8 @@
 // data-intro="pending" before first paint (only when motion is allowed); CSS then hides the
 // `.intro-hide` pieces until this sequence adds `.is-in` to each one.
 
+import { thinkKeyframes, THINK_IN, THINK_OUT } from './motion';
+
 const EASE_OUT = 'cubic-bezier(0.22, 1, 0.36, 1)';
 const EASE_IN_OUT = 'cubic-bezier(0.65, 0, 0.35, 1)';
 const EASE_SETTLE = 'cubic-bezier(0.34, 1.32, 0.64, 1)'; // a whisper of overshoot, no bounce
@@ -24,6 +26,7 @@ export function initHeroIntro(hero: HTMLElement) {
   const prompt = $('[data-prompt]');
   const typed = $('[data-typed]');
   const progress = $('.prompt-progress');
+  const bot = hero.querySelector<HTMLElement>('[data-thinking]');
   const send = $<HTMLButtonElement>('[data-prompt] button');
   const question = typed.textContent!.trim();
 
@@ -115,10 +118,6 @@ export function initHeroIntro(hero: HTMLElement) {
       fill: 'none',
     });
     prompt.classList.add('is-searching');
-    // The empty result panel stays hidden while typing and fades in softly once submitted.
-    reveal(parts.stage, [{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'none' }], {
-      duration: 900,
-    });
     play(
       progress,
       [
@@ -129,6 +128,23 @@ export function initHeroIntro(hero: HTMLElement) {
       ],
       { duration: 1100, easing: 'cubic-bezier(0.45, 0, 0.55, 1)', fill: 'none' },
     );
+    // A quick "Thinking" beat below the prompt; nothing else appears until it has gone.
+    const THINK_HOLD = 520;
+    const THINK_DELAY = 120;
+    if (bot) {
+      play(bot, thinkKeyframes(THINK_HOLD), {
+        duration: THINK_IN + THINK_HOLD + THINK_OUT,
+        delay: THINK_DELAY,
+        easing: 'linear',
+        fill: 'none',
+      });
+    }
+    await wait(THINK_DELAY + THINK_IN + THINK_HOLD + THINK_OUT);
+
+    // The empty result panel fades in softly once the bot has finished thinking.
+    reveal(parts.stage, [{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'none' }], {
+      duration: 900,
+    });
     await wait(440);
 
     // 3. Connected accounts arrive one after another.

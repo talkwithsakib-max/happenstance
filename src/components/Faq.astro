@@ -3,10 +3,11 @@ import { Image } from 'astro:assets';
 import SectionHeading from './SectionHeading.astro';
 import SendButton from './SendButton.astro';
 import FaqAnswer from './FaqAnswer.astro';
+import ThinkingBot from './ThinkingBot.astro';
+import BotMark from './BotMark.astro';
 import { faqGroups, allQuestions, initialQuestion } from '../data/faq';
 
 import you from '../assets/faq/you.png';
-import flower from '../assets/icons/flower.svg?url';
 import arrow from '../assets/faq/arrow-blue.svg?url';
 
 const total = String(allQuestions.length).padStart(2, '0');
@@ -51,7 +52,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
                   )}
                   {q.answer && (
                     <div class="inline" id={`faq-inline-${q.number}`} role="region" aria-label={q.question}>
-                      <div class="inline-inner">
+                      <div class="inline-inner" data-motion data-answer>
                         <FaqAnswer answer={q.answer} />
                       </div>
                     </div>
@@ -67,7 +68,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
 
     <div class="card" aria-live="polite">
       <div class="card-head">
-        <span class="mark"><img src={flower} alt="" width="14" height="14" /></span>
+        <span class="mark"><BotMark size={18} /></span>
         <p class="card-title display">Ask Happenstance</p>
         <p class="card-count"><span data-count>{pad(initialQuestion)}</span> / {total}</p>
       </div>
@@ -76,13 +77,14 @@ const pad = (n: number) => String(n).padStart(2, '0');
         allQuestions
           .filter((q) => q.answer)
           .map((q) => (
-            <div class="thread" data-thread={q.number} hidden={q.number !== initialQuestion}>
+            <div class="thread" data-thread={q.number} data-motion data-answer hidden={q.number !== initialQuestion}>
               <div class="you">
-                <p class="bubble">{q.question}</p>
-                <Image src={you} alt="" width={32} height={32} densities={[1, 2]} class="you-photo" />
+                <p class="bubble m-hide">{q.question}</p>
+                <Image src={you} alt="" width={32} height={32} densities={[1, 2]} class="you-photo m-hide" />
               </div>
               <div class="answer">
-                <span class="mark"><img src={flower} alt="" width="14" height="14" /></span>
+                <span class="mark m-hide"><BotMark size={18} /></span>
+                <ThinkingBot class="thinking-slot" />
                 <FaqAnswer answer={q.answer!} />
               </div>
             </div>
@@ -90,20 +92,101 @@ const pad = (n: number) => String(n).padStart(2, '0');
       }
 
       <div class="ask" aria-hidden="true">
-        <span>Ask anything about Happenstance…</span>
+        <span class="ask-field">
+          <span class="ask-placeholder">Ask anything about Happenstance…</span>
+          <span class="ask-typed" data-ask-typed></span><span class="ask-caret"></span>
+        </span>
         <SendButton label="Ask" />
       </div>
     </div>
   </div>
+
+  <script is:inline>
+    // Lets answers build in sequence only when motion is allowed.
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches)
+      document.currentScript.parentElement.querySelectorAll('[data-answer]').forEach((el) => (el.dataset.motion = 'pending'));
+  </script>
 </section>
 
 <script>
+  import { createSequence, onFirstView, reducedMotion, rise, fadeUp, pop, EASE_SETTLE } from '../scripts/motion';
+
+  type Seq = ReturnType<typeof createSequence>;
+
+  // Chat-style answer: question bubble, the Happenstance bot thinking, the reply streaming in word by
+  // word, then the example search and the follow-up suggestions.
+  const playAnswer = async (root: HTMLElement, s: Seq) => {
+    s.reset();
+    root.dataset.motion = 'playing';
+    const $ = (sel: string) => root.querySelector<HTMLElement>(sel);
+    const bubble = $('.bubble');
+    let start = 80;
+
+    if (bubble) {
+      s.reveal(bubble, [{ opacity: 0, transform: 'translateX(12px)' }, { opacity: 1, transform: 'none' }], { duration: 460 });
+      s.reveal($('.you-photo'), pop, { duration: 460, delay: 120, easing: EASE_SETTLE });
+      // The Happenstance bot thinks where the mark sits, then hands over to the mark and the reply.
+      const replyAt = s.think($('[data-thinking]'), 420, 950);
+      s.reveal($('.answer .mark'), pop, { duration: 420, delay: replyAt - 60, easing: EASE_SETTLE });
+      start = replyAt + 80;
+    }
+
+    const streamed = s.stream($('[data-stream]')!, { delay: start, stagger: 16 });
+    await s.wait(streamed - 160);
+
+    const example = $('.example');
+    if (example) {
+      s.reveal(example, rise, { duration: 560 });
+      const query = $('.query')!;
+      s.reveal(query, fadeUp, { duration: 420, delay: 120 });
+      await s.wait(260);
+      const typed = $('[data-type]')!;
+      await s.typeText(typed, typed.dataset.type!, 30);
+      await s.wait(160);
+      root.querySelectorAll('.person').forEach((row, i) => {
+        s.reveal(row, rise, { duration: 560, delay: i * 130 });
+        s.reveal(row.querySelector('.via'), pop, { duration: 440, delay: 260 + i * 130, easing: EASE_SETTLE });
+      });
+      await s.wait(420);
+    }
+
+    const next = $('.next');
+    if (next) {
+      s.reveal(next, fadeUp, { duration: 420 });
+      next.querySelectorAll('.chip').forEach((chip, i) => s.reveal(chip, fadeUp, { duration: 380, delay: 120 + i * 80 }));
+    }
+  };
+
   document.querySelectorAll<HTMLElement>('[data-faq]').forEach((root) => {
     const items = [...root.querySelectorAll<HTMLElement>('[data-item]')];
     const threads = [...root.querySelectorAll<HTMLElement>('[data-thread]')];
     const count = root.querySelector<HTMLElement>('[data-count]')!;
+    const card = root.querySelector<HTMLElement>('.card')!;
     const mobile = window.matchMedia('(max-width: 1023px)');
+    const animate = !reducedMotion() && threads.every((t) => t.dataset.motion === 'pending');
     let active: number | null = Number(root.dataset.active);
+
+    // One sequence per answer: the chat thread (desktop) and the accordion panel (mobile).
+    const seqs = new Map<HTMLElement, Seq>();
+    root.querySelectorAll<HTMLElement>('[data-answer]').forEach((el) => {
+      const s = createSequence(el);
+      seqs.set(el, s);
+      if (animate) {
+        s.reset();
+        el.dataset.motion = 'ready';
+      }
+    });
+
+    const answerFor = (number: number) =>
+      mobile.matches
+        ? root.querySelector<HTMLElement>(`[data-item="${number}"] [data-answer]`)
+        : root.querySelector<HTMLElement>(`[data-thread="${number}"]`);
+
+    const play = (number: number | null) => {
+      if (!animate || number === null) return;
+      const el = answerFor(number);
+      if (el) playAnswer(el, seqs.get(el)!).catch(() => {});
+    };
 
     const render = () => {
       items.forEach((item) => {
@@ -122,16 +205,35 @@ const pad = (n: number) => String(n).padStart(2, '0');
       const number = Number(target.dataset.ask);
       // On small screens the list is an accordion, so a second tap closes the item.
       active = mobile.matches && active === number ? null : number;
+      const from = card.offsetHeight;
       render();
+      // Ease the chat card to the new answer's height instead of snapping.
+      if (animate && !mobile.matches) {
+        const to = card.offsetHeight;
+        if (from !== to) {
+          card.animate([{ height: `${from}px` }, { height: `${to}px` }], {
+            duration: 420,
+            easing: 'cubic-bezier(0.65, 0, 0.35, 1)',
+          });
+        }
+      }
+      play(active);
     });
 
-    // Leaving the accordion layout with nothing open would leave the card empty.
+    // Switching layouts shows answers finished rather than half-built.
     mobile.addEventListener('change', () => {
       if (!mobile.matches && active === null) {
         active = Number(threads[0]?.dataset.thread);
         render();
       }
+      seqs.forEach((s) => s.finish());
     });
+
+    // The opening answer builds when it first scrolls into view.
+    if (animate && active !== null) {
+      const first = answerFor(active);
+      if (first) onFirstView(first, () => play(active), 0.3);
+    }
   });
 </script>
 
@@ -260,8 +362,9 @@ const pad = (n: number) => String(n).padStart(2, '0');
     display: flex;
     flex: 0 0 690px;
     flex-direction: column;
-    gap: 24px;
+    gap: 0; /* the active thread carries the spacing so it can collapse to nothing */
     padding: 20px 28px 28px;
+    overflow: hidden; /* clips content while the card eases between answer heights */
     border-radius: var(--r-xl);
     background: var(--surface);
     filter: drop-shadow(0 24px 24px rgba(51, 46, 115, 0.14));
@@ -299,21 +402,24 @@ const pad = (n: number) => String(n).padStart(2, '0');
   }
 
   .thread {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: 24px;
-    animation: enter 400ms var(--ease) both;
+    margin-bottom: 24px; /* space above the input, kept even when the thread is collapsed */
+  }
+
+  .thread > :first-child {
+    margin-top: 24px;
+  }
+
+  /* While an answer builds, the thread grows from zero height; overflow stays clipped. */
+  .thread.is-growing {
+    overflow: hidden;
   }
 
   .thread[hidden] {
     display: none;
-  }
-
-  @keyframes enter {
-    from {
-      opacity: 0;
-      transform: translateY(6px);
-    }
   }
 
   .you {
@@ -339,9 +445,17 @@ const pad = (n: number) => String(n).padStart(2, '0');
   }
 
   .answer {
+    position: relative;
     display: flex;
     align-items: flex-start;
     gap: 12px;
+  }
+
+  /* The thinking bot overlays the start of the answer row (where the mark appears). */
+  .answer :global(.thinking-slot) {
+    position: absolute;
+    top: 0;
+    left: 0;
   }
 
   .answer > :global(.reply) {
@@ -350,6 +464,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
   }
 
   .ask {
+    margin-top: auto; /* stays on the card's bottom edge as its height changes */
     display: flex;
     align-items: center;
     gap: 12px;
@@ -360,8 +475,42 @@ const pad = (n: number) => String(n).padStart(2, '0');
     color: var(--text-placeholder);
   }
 
-  .ask span {
+  .ask-field {
+    position: relative;
     flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+  }
+
+  /* While a question is being typed the placeholder gives way to the typed text and a caret. */
+  .ask-placeholder {
+    transition: opacity 200ms var(--ease);
+  }
+
+  .ask-typed {
+    position: absolute;
+    left: 0;
+    color: var(--text-primary);
+  }
+
+  .ask-caret {
+    display: none;
+    width: 1.2px;
+    height: 16px;
+    margin-left: 1px;
+    vertical-align: -3px;
+    border-radius: 1px;
+    background: var(--blue-900);
+  }
+
+  .card.is-typing .ask-placeholder {
+    opacity: 0;
+  }
+
+  .card.is-typing .ask-caret {
+    display: inline-block;
+    position: absolute;
+    left: var(--caret-x, 0);
   }
 
   /* Accordion on smaller screens */
