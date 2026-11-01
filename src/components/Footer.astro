@@ -118,27 +118,17 @@ const socials = [
   /* A pale-sky watercolor behind the wordmark; it fades in from transparent above the legal row. */
   .art {
     position: absolute;
-    left: calc(50% - 970px);
+    left: 50%;
     bottom: 0;
-    width: 1700px;
+    /* At least Figma's 1700px, and always wider than the screen, so the painting runs edge to
+       edge on wide displays instead of stopping short of one side. */
+    width: max(1700px, 100%);
     height: 720px;
-    /* Figma clips this 1700px art at the 1440px frame edges, so its ends are never seen.
-       On wider screens they would show as hard seams; fade them in proportion to the extra width
-       (0px at 1440, up to 240px), leaving the 1440px render identical to Figma. */
-    --side-fade: clamp(0px, 100vw - 1440px, 240px);
-    --side-mask: linear-gradient(
-      90deg,
-      transparent 0,
-      #000 var(--side-fade),
-      #000 calc(100% - var(--side-fade)),
-      transparent 100%
-    );
-    mask-image: var(--edge-fade), var(--side-mask);
-    -webkit-mask-image: var(--edge-fade), var(--side-mask);
+    translate: -50% 0;
+    mask-image: var(--edge-fade);
+    -webkit-mask-image: var(--edge-fade);
     mask-size: 100% 100%;
     -webkit-mask-size: 100% 100%;
-    mask-composite: intersect;
-    -webkit-mask-composite: source-in;
   }
 
   .art img {
