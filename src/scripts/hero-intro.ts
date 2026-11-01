@@ -1,5 +1,5 @@
-// Hero intro: the prompt types a question, "submits" it, and the network panel builds its
-// answer step by step. Everything runs on the Web Animations API, so the whole sequence
+// Hero intro: the prompt types a question, "submits" it, thinks for a beat, and the answer card
+// comes out from under the input with its warm paths. Everything runs on the Web Animations API, so the whole sequence
 // shares one clock (it pauses together when the tab is hidden) and needs no dependency.
 //
 // The page is server-rendered in its finished Figma state. An inline script in Hero.astro sets
@@ -10,12 +10,6 @@ import { thinkKeyframes, THINK_IN, THINK_OUT } from './motion';
 
 const EASE_OUT = 'cubic-bezier(0.22, 1, 0.36, 1)';
 const EASE_IN_OUT = 'cubic-bezier(0.65, 0, 0.35, 1)';
-const EASE_SETTLE = 'cubic-bezier(0.34, 1.32, 0.64, 1)'; // a whisper of overshoot, no bounce
-
-const fadeUp: Keyframe[] = [
-  { opacity: 0, transform: 'translateY(6px)' },
-  { opacity: 1, transform: 'none' },
-];
 
 export function initHeroIntro(hero: HTMLElement) {
   if (hero.dataset.intro !== 'pending') return;
@@ -31,17 +25,8 @@ export function initHeroIntro(hero: HTMLElement) {
   const question = typed.textContent!.trim();
 
   const parts = {
-    stage: $('[data-stage]'),
-    labelSources: $('.label-sources'),
-    labelMap: $('.label-map'),
-    labelPaths: $('.label-paths'),
-    sources: $$('.source'),
-    wipe: $('[data-wipe]'),
-    pulses: $('[data-pulses]'),
-    contactShadow: $('.contact-shadow'),
-    you: $('.you'),
-    halo: $('.halo'),
-    caption: $('.you-caption'),
+    answer: $('[data-answer]'),
+    head: $('.answer-head'),
     count: $('[data-count-to]'),
     paths: $$('.path'),
   };
@@ -141,102 +126,45 @@ export function initHeroIntro(hero: HTMLElement) {
     }
     await wait(THINK_DELAY + THINK_IN + THINK_HOLD + THINK_OUT);
 
-    // The empty result panel fades in softly once the bot has finished thinking.
-    reveal(parts.stage, [{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'none' }], {
-      duration: 900,
-    });
-    await wait(440);
+    // 3. The answer slides out from under the input (the prompt sits above it) and fades in.
+    reveal(
+      parts.answer,
+      [
+        { opacity: 0, transform: 'translateY(-36px)' },
+        { opacity: 1, transform: 'none' },
+      ],
+      { duration: 760 },
+    );
+    await wait(280);
 
-    // 3. Connected accounts arrive one after another.
-    reveal(parts.labelSources, fadeUp, { duration: 500 });
-    parts.sources.forEach((el, i) =>
+    // 4. The label and the mapped count, then the warm paths one after another.
+    reveal(parts.head, [{ opacity: 0 }, { opacity: 1 }], { duration: 480 });
+    countUp(parts.count, Number(parts.count.dataset.countTo), 1000);
+    parts.paths.forEach((row, i) =>
       reveal(
-        el,
+        row,
         [
-          { opacity: 0, transform: 'translateX(-10px)', filter: 'blur(4px)' },
+          { opacity: 0, transform: 'translateY(10px)', filter: 'blur(4px)' },
           { opacity: 1, transform: 'none', filter: 'blur(0px)' },
         ],
-        { duration: 620, delay: 90 + i * 85 },
+        { duration: 620, delay: 120 + i * 130 },
       ),
     );
-    await wait(90 + 4 * 85 + 260);
 
-    // 4. Lines draw toward "You" (the connector art spans the panel; reveal it left to right).
-    const wipeIn = reveal(
-      parts.wipe,
-      [{ clipPath: 'inset(0 75% 0 0)' }, { clipPath: 'inset(0 62.7% 0 0)' }],
-      { duration: 520, easing: EASE_IN_OUT },
-      true,
-    );
-    await wait(380);
-
-    // 5. "You" settles in and the mapped count rises.
-    reveal(parts.labelMap, fadeUp, { duration: 500 });
-    reveal(parts.contactShadow, [{ opacity: 0, transform: 'scaleX(0.6)' }, { opacity: 1, transform: 'none' }], {
-      duration: 700,
-    });
-    reveal(parts.you, [{ opacity: 0, transform: 'scale(0.86)' }, { opacity: 1, transform: 'none' }], {
-      duration: 760,
-      easing: EASE_SETTLE,
-    });
-    play(parts.halo, [{ opacity: 0, transform: 'scale(0.6)' }, { opacity: 1, transform: 'none' }], {
-      duration: 1100,
-      delay: 120,
-    });
-    reveal(parts.caption, fadeUp, { duration: 520, delay: 260 });
-    await wait(260);
-    countUp(parts.count, Number(parts.count.dataset.countTo), 1100);
-    await wait(520);
-
-    // 6. Lines continue to the right and the warm paths rise in, strongest first.
-    const wipeOut = play(
-      parts.wipe,
-      [{ clipPath: 'inset(0 62.7% 0 0)' }, { clipPath: 'inset(0 0% 0 0)' }],
-      { duration: 760, easing: EASE_IN_OUT },
-      true,
-    );
-    wipeOut.finished.then(() => {
-      wipeIn.cancel();
-      wipeOut.cancel();
-    }, () => {});
-    reveal(parts.pulses, [{ opacity: 0 }, { opacity: 1 }], { duration: 700, delay: 640 });
-    await wait(300);
-
-    reveal(parts.labelPaths, fadeUp, { duration: 500 });
-    parts.paths.forEach((card, i) => {
-      const delay = 120 + i * 150;
-      const shadow = 'drop-shadow(0 2px 2px rgba(36, 55, 85, 0.07))';
-      reveal(
-        card,
+    // 5. The strongest path takes its highlight last.
+    const active = parts.paths.find((row) => row.classList.contains('active'));
+    if (active) {
+      const styles = getComputedStyle(active);
+      play(
+        active,
         [
-          { opacity: 0, transform: 'translateY(12px) scale(0.985)', filter: `blur(4px) ${shadow}` },
-          { opacity: 1, transform: 'none', filter: `blur(0px) ${shadow}` },
+          { borderColor: 'rgba(29, 92, 230, 0)', boxShadow: '0 8px 24px -10px rgba(29, 92, 230, 0)' },
+          { borderColor: styles.borderColor, boxShadow: styles.boxShadow },
         ],
-        { duration: 680, delay },
+        { duration: 700, delay: 120 + parts.paths.length * 130 + 300 },
       );
-      card.querySelectorAll('.bars i').forEach((bar, j) =>
-        play(
-          bar,
-          [
-            { transform: 'scaleY(0)', transformOrigin: '50% 100%' },
-            { transform: 'scaleY(1)', transformOrigin: '50% 100%' },
-          ],
-          { duration: 460, delay: delay + 380 + j * 70 },
-        ),
-      );
-      if (card.classList.contains('active')) {
-        const styles = getComputedStyle(card);
-        play(
-          card,
-          [
-            { borderColor: 'rgba(29, 92, 230, 0)', boxShadow: '0 8px 24px -10px rgba(29, 92, 230, 0)' },
-            { borderColor: styles.borderColor, boxShadow: styles.boxShadow },
-          ],
-          { duration: 700, delay: 120 + parts.paths.length * 150 + 420 },
-        );
-      }
-    });
-    await wait(120 + parts.paths.length * 150 + 1120);
+    }
+    await wait(120 + parts.paths.length * 130 + 1000);
 
     prompt.classList.remove('is-searching');
     running = false;

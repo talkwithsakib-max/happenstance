@@ -3,31 +3,17 @@ import { Image } from 'astro:assets';
 import SendButton from './SendButton.astro';
 import StrengthMeter from './StrengthMeter.astro';
 import ThinkingBot from './ThinkingBot.astro';
-import BotMark from './BotMark.astro';
 
 import grain from '../assets/hero/grain.png';
-import etching from '../assets/hero/etching.png';
-import etchingMask from '../assets/hero/etching-mask.svg?url';
+import watercolor from '../assets/hero/watercolor.png';
 import avatar1 from '../assets/hero/avatar-1.jpg';
 import avatar2 from '../assets/hero/avatar-2.jpg';
 import avatar3 from '../assets/hero/avatar-3.jpg';
 import avatar4 from '../assets/hero/avatar-4.jpg';
 import avatar5 from '../assets/hero/avatar-5.jpg';
-import you from '../assets/hero/you.png';
 import sarah from '../assets/hero/sarah-chen.png';
 import rahul from '../assets/hero/rahul-mehta.png';
 import emma from '../assets/hero/emma-liu.png';
-import gmail from '../assets/icons/gmail-fill.png';
-import calendar from '../assets/icons/calendar.png';
-import linkedin from '../assets/icons/linkedin.svg?url';
-import x from '../assets/icons/x.svg?url';
-import outlook from '../assets/icons/outlook.svg?url';
-import connectors from '../assets/hero/connectors.svg?url';
-import pulses from '../assets/hero/flow-pulses.svg?url';
-import contactShadow from '../assets/hero/contact-shadow.svg?url';
-import halo from '../assets/hero/halo.svg?url';
-import ring from '../assets/hero/ring.svg?url';
-import plate from '../assets/hero/plate.svg?url';
 
 const avatars = [
   { src: avatar1, pos: '52% 45%' },
@@ -37,17 +23,9 @@ const avatars = [
   { src: avatar5, pos: '50% 20%' },
 ];
 
-const sources = [
-  { name: 'Gmail', raster: gmail, w: 18, h: 13.5 },
-  { name: 'Calendar', raster: calendar, w: 18, h: 18 },
-  { name: 'LinkedIn', svg: linkedin, w: 18, h: 18 },
-  { name: 'Twitter / X', svg: x, w: 18, h: 18 },
-  { name: 'Outlook', svg: outlook, w: 18, h: 17.39 },
-];
-
 const paths = [
   { name: 'Sarah Chen', role: 'PM at Meta', photo: sarah, initial: 'D', via: 'via Daniel · classmate', tone: 'blue', level: 'strong' },
-  { name: 'Rahul Mehta', role: 'Recruiter at Meta', photo: rahul, initial: 'P', via: 'via Priya · ex-teammate', tone: 'green', level: 'strong' },
+  { name: 'Rahul Mehta', role: 'Recruiter at Meta', photo: rahul, initial: 'P', via: 'via Priya · ex-teammate', tone: 'green', level: 'good' },
   { name: 'Emma Liu', role: 'Engineer at Meta', photo: emma, initial: 'A', via: 'via Alex · friend', tone: 'amber', level: 'good' },
 ] as const;
 ---
@@ -59,9 +37,6 @@ const paths = [
   </script>
   <div class="bg" aria-hidden="true">
     <div class="grain" style={`background-image:url(${grain.src});opacity:.25`}></div>
-    <div class="etching" style={`mask-image:url("${etchingMask}");-webkit-mask-image:url("${etchingMask}")`}>
-      <Image src={etching} alt="" widths={[1440, 1584]} sizes="100vw" loading="eager" />
-    </div>
   </div>
 
   <div class="intro container">
@@ -86,73 +61,46 @@ const paths = [
     </p>
 
     <div class="prompt-wrap">
-    <div class="prompt" data-prompt>
-      <p class="prompt-text display">
-        <span class="prompt-typed" data-typed>Who do I know at Meta from my school?</span><span
-          class="caret"
-          aria-hidden="true"></span>
-      </p>
-      <div class="prompt-actions"><SendButton label="Replay the search demo" /></div>
-      <span class="prompt-progress" aria-hidden="true"></span>
-    </div>
-    <ThinkingBot tone="pill" class="prompt-think" />
-    </div>
-  </div>
-
-  <div class="stage intro-hide" data-stage>
-    <div class="panel" data-fit="944" role="img" aria-label="Accounts flow into your network map, which ranks warm paths to people at Meta">
-      <img class="layer intro-hide" data-wipe src={connectors} alt="" />
-      <img class="layer pulses intro-hide" data-pulses src={pulses} alt="" />
-
-      <p class="label label-sources intro-hide">Connect your accounts</p>
-      <p class="label label-map intro-hide">Your network map</p>
-      <p class="label label-paths intro-hide">Warm paths</p>
-
-      <ul class="sources">
-        {
-          sources.map((s) => (
-            <li class="source intro-hide">
-              <span class="source-icon">
-                {s.raster ? (
-                  <Image src={s.raster} alt="" width={s.w * 2} style={`width:${s.w}px;height:${s.h}px`} />
-                ) : (
-                  <img src={s.svg} alt="" style={`width:${s.w}px;height:${s.h}px`} />
-                )}
-              </span>
-              {s.name}
-            </li>
-          ))
-        }
-      </ul>
-
-      <img class="contact-shadow intro-hide" src={contactShadow} alt="" />
-      <div class="you intro-hide">
-        <img class="halo" src={halo} alt="" />
-        <img class="ring" src={ring} alt="" />
-        <img class="plate" src={plate} alt="" />
-        <Image class="you-photo" src={you} alt="" width={104} height={104} densities={[1, 2]} />
-        <span class="you-badge"><BotMark size={22} /></span>
+      <div class="art" aria-hidden="true">
+        <Image src={watercolor} alt="" widths={[900, 1376]} sizes="900px" loading="eager" />
       </div>
-      <p class="you-caption intro-hide">You · <span data-count-to="1284">1,284</span> people mapped</p>
+      <div class="prompt" data-prompt>
+        <p class="prompt-text display">
+          <span class="prompt-typed" data-typed>Who do I know at Meta from my school?</span><span
+            class="caret"
+            aria-hidden="true"></span>
+        </p>
+        <div class="prompt-actions"><SendButton label="Replay the search demo" /></div>
+        <span class="prompt-progress" aria-hidden="true"></span>
+      </div>
+      <ThinkingBot tone="pill" class="prompt-think" />
 
-      <ul class="paths">
-        {
-          paths.map((p, i) => (
-            <li class:list={['path', 'intro-hide', { active: i === 0 }]}>
-              <Image class="path-photo" src={p.photo} alt="" width={40} height={40} densities={[1, 2]} />
-              <div class="path-info">
-                <p class="path-name">{p.name}</p>
-                <p class="path-role">{p.role}</p>
-                <p class="path-via">
-                  <span class:list={['mutual', p.tone]}>{p.initial}</span>
-                  {p.via}
-                </p>
-              </div>
-              <StrengthMeter level={p.level} />
-            </li>
-          ))
-        }
-      </ul>
+      <!-- The answer comes out from under the input (pattern from exa.ai). -->
+      <div class="answer intro-hide" data-answer role="group" aria-label="Three warm paths to people at Meta">
+        <p class="answer-head intro-hide">
+          <span class="answer-label">3 warm paths at Meta</span>
+          <span class="answer-meta">from <span data-count-to="1284">1,284</span> people mapped</span>
+        </p>
+        <ul class="paths">
+          {
+            paths.map((p, i) => (
+              <li class:list={['path', 'intro-hide', { active: i === 0 }]}>
+                <Image class="path-photo" src={p.photo} alt="" width={40} height={40} densities={[1, 2]} />
+                <div class="path-info">
+                  <p class="path-name">{p.name}</p>
+                  <p class="path-role">{p.role}</p>
+                  <p class="path-via">
+                    <span class:list={['mutual', p.tone]}>{p.initial}</span>
+                    {p.via}
+                  </p>
+                </div>
+                <StrengthMeter level={p.level} />
+              </li>
+            ))
+          }
+        </ul>
+        <span class="answer-fade" aria-hidden="true"></span>
+      </div>
     </div>
   </div>
 </section>
@@ -169,7 +117,7 @@ const paths = [
     /* The header overlaps the hero in Figma; pull the hero up behind it. */
     margin-top: -64px;
     padding-top: 125px;
-    padding-bottom: 49px;
+    padding-bottom: 76px;
     /* Same as the page behind the sections below, so there is no seam at the hero's edge. */
     background: var(--bg-page);
     overflow: hidden;
@@ -179,25 +127,6 @@ const paths = [
     position: absolute;
     inset: 0;
     pointer-events: none;
-  }
-
-  .etching {
-    position: absolute;
-    top: 175px;
-    left: 50%;
-    width: 1440px;
-    height: 610px;
-    transform: translateX(-50%);
-    opacity: 0.6;
-    mix-blend-mode: multiply;
-    mask-size: 100% 100%;
-    -webkit-mask-size: 100% 100%;
-  }
-
-  .etching img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
   }
 
   .intro {
@@ -266,6 +195,7 @@ const paths = [
 
   .prompt {
     position: relative;
+    z-index: 2;
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -318,8 +248,7 @@ const paths = [
     padding: 12px;
   }
 
-  /* Thinking bot in the prompt's lower-left corner while the search runs. */
-  /* Wraps the prompt so the thinking bot can sit just below it, above the result panel. */
+  /* Wraps the prompt, the thinking bot just below it, and the answer card. */
   .prompt-wrap {
     position: relative;
     z-index: 3;
@@ -330,7 +259,8 @@ const paths = [
 
   .prompt-wrap :global(.prompt-think) {
     position: absolute;
-    top: calc(100% + 10px);
+    z-index: 3;
+    top: 106px;
     left: 0;
   }
 
@@ -359,11 +289,6 @@ const paths = [
     opacity: 0;
   }
 
-  /* The idle pulse is a CSS animation, which would override the hidden opacity above. */
-  .hero[data-intro] .pulses:not(.is-in) {
-    animation: none;
-  }
-
   @media (prefers-reduced-motion: reduce) {
     .hero[data-intro] .intro-hide:not(.is-in) {
       opacity: 1;
@@ -374,219 +299,82 @@ const paths = [
     }
   }
 
-  /* ---- Network visual ---- */
-  .stage {
-    position: relative;
-    width: 1024px;
-    max-width: calc(100% - var(--gutter) * 2 + 80px);
-    margin: -2px auto 0;
-    padding: 40px;
-  }
-
-  .stage::before,
-  .stage::after {
-    content: '';
+  /* ---- Background art ----
+     A watercolor a little wider than the card, sitting behind its lower part so it only peeks
+     out at the sides (pattern from littlebird.ai). It fades to nothing before its own edges. */
+  .art {
     position: absolute;
-    inset: 0 0 auto;
-    height: 640px;
+    z-index: -1;
+    left: 50%;
+    bottom: -20px;
+    width: 900px;
+    height: 381px;
+    translate: -50% 0;
+    opacity: 0.85;
     pointer-events: none;
+    mask-image: radial-gradient(closest-side, #000 60%, transparent);
+    -webkit-mask-image: radial-gradient(closest-side, #000 60%, transparent);
   }
 
-  .stage::before {
-    background: radial-gradient(553px 46px at 50% 474px, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.05) 48%, transparent);
-  }
-
-  .stage::after {
-    background: radial-gradient(471px 30px at 50% 458px, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.11) 42%, transparent);
-  }
-
-  .panel {
-    position: relative;
-    z-index: 1;
-    width: 944px;
-    height: 440px;
-    margin-inline: auto;
-    border-radius: var(--r-xl);
-    background: var(--surface);
-    transform-origin: top left;
-  }
-
-  .layer {
-    position: absolute;
-    inset: 0;
+  .art img {
     width: 100%;
     height: 100%;
-    pointer-events: none;
+    object-fit: cover;
   }
 
-  .pulses {
-    animation: pulse 2.4s ease-in-out infinite;
-  }
-
-  @keyframes pulse {
-    50% {
-      opacity: 0.45;
-    }
-  }
-
-  .label {
-    position: absolute;
-    top: 36px;
-    font-size: 11px;
-    font-weight: 500;
-    letter-spacing: -0.11px;
-    color: var(--text-caption);
-  }
-
-  .label-sources {
-    left: 40px;
-    text-transform: capitalize;
-  }
-
-  /* Centred with `translate` (not `transform`) so the intro's fade-up can't override it. */
-  .label-map {
-    left: 414px;
-    translate: -50% 0;
-  }
-
-  .label-paths {
-    left: 592px;
-  }
-
-  .sources {
-    position: absolute;
-    top: 88px;
-    left: 40px;
+  /* ---- Answer card ----
+     Same width as the input and tucked 12px under it, so the answer reads as coming out of it. */
+  .answer {
+    position: relative;
+    z-index: 1;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
+    margin-top: -12px;
+    padding: 28px 12px 12px;
+    overflow: hidden;
+    border-radius: 0 0 12px 12px;
+    background: #fafafa;
+    text-align: left;
   }
 
-  .source {
+  .answer-head {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 12px;
-    width: 196px;
-    height: 48px;
-    padding: 12px;
-    border-radius: var(--r-md);
-    background: var(--bg-soft);
-    box-shadow: 0 2px 4px 0 rgba(36, 55, 85, 0.07);
-    font-size: 14px;
+    padding-inline: 2px;
+    color: rgba(0, 0, 0, 0.4);
+  }
+
+  .answer-label {
+    font-size: 10px;
     font-weight: 500;
-    letter-spacing: -0.07px;
-    color: var(--text-ink);
-    transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
   }
 
-  .source:hover {
-    transform: translateX(2px);
-    box-shadow: 0 6px 14px -6px rgba(36, 55, 85, 0.2), 0 2px 4px 0 rgba(36, 55, 85, 0.07);
-  }
-
-  .source-icon {
-    display: grid;
-    place-items: center;
-    width: 32px;
-    height: 32px;
-    margin: -4px 0;
-    border-radius: var(--r-md);
-    background: var(--bg-subtle);
-  }
-
-  .contact-shadow {
-    position: absolute;
-    left: 388px;
-    top: 288px;
-    width: 52px;
-    height: 8px;
-  }
-
-  .you {
-    position: absolute;
-    left: 352px;
-    top: 170px;
-    width: 124px;
-    height: 124px;
-  }
-
-  .halo {
-    position: absolute;
-    left: -32px;
-    top: -32px;
-    width: 188px;
-    height: 188px;
-  }
-
-  .ring {
-    position: absolute;
-    inset: 0;
-    width: 124px;
-    height: 124px;
-  }
-
-  .plate {
-    position: absolute;
-    left: 4px;
-    top: 4px;
-    width: 116px;
-    height: 116px;
-  }
-
-  .you-photo {
-    position: absolute;
-    left: 10px;
-    top: 10px;
-    width: 104px;
-    height: 104px;
-    border-radius: 50%;
-  }
-
-  .you-badge {
-    position: absolute;
-    left: 90px;
-    top: 88px;
-    display: grid;
-    place-items: center;
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    background: var(--surface);
-    box-shadow: 0 6px 20px -4px rgba(15, 20, 38, 0.06), 0 1px 2px 0 rgba(15, 20, 38, 0.05);
-  }
-
-  .you-caption {
-    position: absolute;
-    left: 414px;
-    top: 318px;
-    translate: -50% 0;
-    font-size: 12px;
-    font-weight: 500;
-    letter-spacing: -0.06px;
-    color: var(--text-body);
-    white-space: nowrap;
+  .answer-meta {
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
   }
 
   .paths {
-    position: absolute;
-    left: 592px;
-    top: 90px;
     display: flex;
     flex-direction: column;
-    gap: 28px;
+    gap: 6px;
   }
 
   .path {
     display: flex;
     align-items: center;
     gap: 12px;
-    width: 312px;
     height: 76px;
     padding: 12px 14px 12px 12px;
     border: 2px solid transparent;
     border-radius: var(--r-md);
-    background: var(--bg-soft);
-    filter: drop-shadow(0 2px 2px rgba(36, 55, 85, 0.07));
+    background: var(--surface);
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.06);
     transition: transform var(--dur) var(--ease), border-color var(--dur) var(--ease);
   }
 
@@ -611,7 +399,6 @@ const paths = [
     min-width: 0;
     flex-direction: column;
     gap: 2px;
-    text-align: left;
   }
 
   .path-name {
@@ -632,10 +419,12 @@ const paths = [
     font-size: 12px;
     font-weight: 500;
     color: var(--text-strong);
+    white-space: nowrap;
   }
 
   .mutual {
     display: grid;
+    flex-shrink: 0;
     place-items: center;
     width: 16px;
     height: 16px;
@@ -659,23 +448,19 @@ const paths = [
     color: var(--amber-700);
   }
 
-  /* Tablet: keep the composition, scale it to fit. */
-  @media (max-width: 1100px) {
-    .stage {
-      width: 100%;
-      max-width: none;
-      padding: 32px var(--gutter);
-    }
-
-    .panel {
-      zoom: var(--fit, 1);
-    }
+  /* The last row fades into the panel. */
+  .answer-fade {
+    position: absolute;
+    inset: auto 0 0;
+    height: 72px;
+    pointer-events: none;
+    background: linear-gradient(rgba(250, 250, 250, 0), #fafafa);
   }
 
-  /* Mobile: reflow the visual into a stacked card. */
   @media (max-width: 767px) {
     .hero {
       padding-top: 104px;
+      padding-bottom: 56px;
     }
 
     h1 {
@@ -701,91 +486,14 @@ const paths = [
     .prompt-text {
       font-size: 13px;
     }
-  }
-
-  /* Below ~960px the scaled composition gets too small to read; reflow it into a stacked card. */
-  @media (max-width: 959px) {
-    .stage {
-      padding: 24px var(--gutter) 0;
-    }
-
-    .panel {
-      zoom: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      width: 100%;
-      max-width: 560px;
-      height: auto;
-      padding: 24px 16px;
-    }
-
-    .layer,
-    .label-map,
-    .contact-shadow,
-    .stage::before,
-    .stage::after {
-      display: none;
-    }
-
-    .label,
-    .sources,
-    .you,
-    .you-caption,
-    .paths {
-      position: static;
-      transform: none;
-      translate: none;
-    }
-
-    .sources {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-    }
-
-    .source {
-      width: auto;
-      font-size: 13px;
-    }
-
-    .label-sources {
-      order: 1;
-    }
-
-    .sources {
-      order: 2;
-    }
-
-    .you {
-      position: relative;
-      left: auto;
-      top: auto;
-      order: 3;
-      align-self: center;
-      margin-top: 24px;
-    }
-
-    .you-caption {
-      order: 4;
-      text-align: center;
-    }
-
-    .label-paths {
-      order: 5;
-      margin-top: 8px;
-    }
-
-    .paths {
-      order: 6;
-    }
-
-    .paths {
-      gap: 12px;
-    }
 
     .path {
-      width: 100%;
+      gap: 10px;
+      padding-inline: 10px;
+    }
+
+    .path-via {
+      font-size: 11px;
     }
   }
 </style>
