@@ -52,6 +52,10 @@ const paths = [
 ---
 
 <section class="hero" aria-labelledby="hero-title">
+  <script is:inline>
+    // Runs before the hero paints, so the intro starts from its empty state without a flash.
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) document.currentScript.parentElement.dataset.intro = 'pending';
+  </script>
   <div class="bg" aria-hidden="true">
     <div class="grain" style={`background-image:url(${grain.src});opacity:.25`}></div>
     <div class="etching" style={`mask-image:url("${etchingMask}");-webkit-mask-image:url("${etchingMask}")`}>
@@ -80,27 +84,30 @@ const paths = [
       people who can refer you.
     </p>
 
-    <div class="prompt">
+    <div class="prompt" data-prompt>
       <p class="prompt-text display">
-        Who do I know at Meta from my school?<span class="caret" aria-hidden="true"></span>
+        <span class="prompt-typed" data-typed>Who do I know at Meta from my school?</span><span
+          class="caret"
+          aria-hidden="true"></span>
       </p>
-      <div class="prompt-actions"><SendButton label="Search" /></div>
+      <div class="prompt-actions"><SendButton label="Replay the search demo" /></div>
+      <span class="prompt-progress" aria-hidden="true"></span>
     </div>
   </div>
 
-  <div class="stage">
+  <div class="stage intro-hide" data-stage>
     <div class="panel" data-fit="944" role="img" aria-label="Accounts flow into your network map, which ranks warm paths to people at Meta">
-      <img class="layer" src={connectors} alt="" />
-      <img class="layer pulses" src={pulses} alt="" />
+      <img class="layer intro-hide" data-wipe src={connectors} alt="" />
+      <img class="layer pulses intro-hide" data-pulses src={pulses} alt="" />
 
-      <p class="label label-sources">Connect your accounts</p>
-      <p class="label label-map">Your network map</p>
-      <p class="label label-paths">Warm paths</p>
+      <p class="label label-sources intro-hide">Connect your accounts</p>
+      <p class="label label-map intro-hide">Your network map</p>
+      <p class="label label-paths intro-hide">Warm paths</p>
 
       <ul class="sources">
         {
           sources.map((s) => (
-            <li class="source">
+            <li class="source intro-hide">
               <span class="source-icon">
                 {s.raster ? (
                   <Image src={s.raster} alt="" width={s.w * 2} style={`width:${s.w}px;height:${s.h}px`} />
@@ -114,20 +121,20 @@ const paths = [
         }
       </ul>
 
-      <img class="contact-shadow" src={contactShadow} alt="" />
-      <div class="you">
+      <img class="contact-shadow intro-hide" src={contactShadow} alt="" />
+      <div class="you intro-hide">
         <img class="halo" src={halo} alt="" />
         <img class="ring" src={ring} alt="" />
         <img class="plate" src={plate} alt="" />
         <Image class="you-photo" src={you} alt="" width={104} height={104} densities={[1, 2]} />
         <span class="you-badge"><img src={flower} alt="" width="20" height="20" /></span>
       </div>
-      <p class="you-caption">You · 1,284 people mapped</p>
+      <p class="you-caption intro-hide">You · <span data-count-to="1284">1,284</span> people mapped</p>
 
       <ul class="paths">
         {
           paths.map((p, i) => (
-            <li class:list={['path', { active: i === 0 }]}>
+            <li class:list={['path', 'intro-hide', { active: i === 0 }]}>
               <Image class="path-photo" src={p.photo} alt="" width={40} height={40} densities={[1, 2]} />
               <div class="path-info">
                 <p class="path-name">{p.name}</p>
@@ -145,6 +152,12 @@ const paths = [
     </div>
   </div>
 </section>
+
+<script>
+  import { initHeroIntro } from '../scripts/hero-intro';
+  const hero = document.querySelector<HTMLElement>('.hero');
+  if (hero) initHeroIntro(hero);
+</script>
 
 <style>
   .hero {
@@ -247,6 +260,8 @@ const paths = [
   }
 
   .prompt {
+    position: relative;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
     width: 525px;
@@ -285,10 +300,59 @@ const paths = [
     }
   }
 
+  /* While characters are being typed the caret stays solid, like a real text field. */
+  .prompt.is-typing .caret {
+    animation: none;
+  }
+
+  .prompt.is-searching .caret {
+    opacity: 0;
+  }
+
   .prompt-actions {
     display: flex;
     justify-content: flex-end;
     padding: 12px;
+  }
+
+  /* Thin "searching" sweep along the bottom edge of the prompt. */
+  .prompt-progress {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 2px;
+    opacity: 0;
+    pointer-events: none;
+    background: linear-gradient(90deg, rgba(30, 130, 224, 0), #1e82e0 35%, #1c38ea 65%, rgba(28, 56, 234, 0));
+    background-size: 50% 100%;
+    background-repeat: no-repeat;
+  }
+
+  /* ---- Intro sequence ----
+     The server renders the finished Figma state. When scripting is available the hero starts
+     with data-intro="pending", hiding the result pieces until the sequence reveals them. */
+  .hero[data-intro='pending'] .prompt-typed {
+    display: none;
+  }
+
+  .hero[data-intro] .intro-hide:not(.is-in) {
+    opacity: 0;
+  }
+
+  /* The idle pulse is a CSS animation, which would override the hidden opacity above. */
+  .hero[data-intro] .pulses:not(.is-in) {
+    animation: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero[data-intro] .intro-hide:not(.is-in) {
+      opacity: 1;
+    }
+
+    .hero[data-intro='pending'] .prompt-typed {
+      display: inline;
+    }
   }
 
   /* ---- Network visual ---- */
