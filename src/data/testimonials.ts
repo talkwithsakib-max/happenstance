@@ -1,9 +1,9 @@
 import type { ImageMetadata } from 'astro';
-import adam from '../assets/testimonials/adam-novak.png';
-import olivia from '../assets/testimonials/olivia-moore.png';
 import garry from '../assets/testimonials/garry-tan.png';
-import marc from '../assets/testimonials/marc-hamel.jpg';
-import yann from '../assets/testimonials/yann-sarfati.png';
+import daniel from '../assets/testimonials/sample-daniel.png';
+import nora from '../assets/testimonials/sample-nora.png';
+import lucas from '../assets/testimonials/sample-lucas.png';
+import owen from '../assets/testimonials/sample-owen.png';
 
 export interface Testimonial {
   name: string;
@@ -13,28 +13,29 @@ export interface Testimonial {
   quote?: string;
   role?: string;
   /**
-   * Placeholder copy for layout review. These are real people, so their draft quotes
-   * only render in the dev server and are stripped from production builds.
-   * Replace with their actual words (and remove `draft`) before publishing.
+   * Illustrative sample: a fictional person (AI-generated portrait, made-up name and quote).
+   * The section labels these as samples. Swap in real customers' words and photos when available.
    */
-  draft?: boolean;
+  sample?: boolean;
 }
 
-// Order matches the Figma stage from left to right. Only Garry Tan's copy comes from Figma.
-const entries: Testimonial[] = [
+// Order matches the Figma stage from left to right. Garry Tan's quote is real; the rest are samples.
+export const testimonials: Testimonial[] = [
   {
-    name: 'Adam Novak',
-    photo: adam,
-    draft: true,
+    name: 'Daniel Reyes',
+    photo: daniel,
+    sample: true,
     headline: { lead: 'Warm intros,', accent: 'without the spreadsheet' },
     quote: '“I used to keep a spreadsheet of who knew who. Now I just ask Happenstance, and the warmest intro is right there.”',
+    role: 'Product Engineer',
   },
   {
-    name: 'Olivia Moore',
-    photo: olivia,
-    draft: true,
+    name: 'Nora Whitfield',
+    photo: nora,
+    sample: true,
     headline: { lead: 'The right person,', accent: 'in minutes' },
     quote: '“I found three people who could introduce me to the team I wanted, faster than I could write a cold email.”',
+    role: 'Seed Investor',
   },
   {
     name: 'Garry Tan',
@@ -44,25 +45,22 @@ const entries: Testimonial[] = [
     role: 'President & CEO, Y Combinator',
   },
   {
-    name: 'Marc Hamel',
-    photo: marc,
-    draft: true,
+    name: 'Lucas Bennett',
+    photo: lucas,
+    sample: true,
     headline: { lead: 'My network,', accent: 'finally searchable' },
     quote: '“It surfaced people I’d forgotten I even knew. That’s exactly who you want vouching for you.”',
+    role: 'Startup Founder',
   },
   {
-    name: 'Yann Sarfati',
-    photo: yann,
-    draft: true,
+    name: 'Owen Fletcher',
+    photo: owen,
+    sample: true,
     headline: { lead: 'The first search', accent: 'I run every morning' },
     quote: '“Before any meeting, I check who we know in common. It changes the whole conversation.”',
+    role: 'Head of Operations',
   },
 ];
-
-// Production builds keep only the name and photo for draft entries.
-export const testimonials: Testimonial[] = entries.map((t) =>
-  t.draft && !import.meta.env.DEV ? { name: t.name, photo: t.photo } : t,
-);
 
 /** Index of the testimonial that is centred on load (Garry Tan, as in Figma). */
 export const initialTestimonial = 2;

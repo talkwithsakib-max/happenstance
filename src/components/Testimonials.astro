@@ -72,6 +72,7 @@ const slotFor = (i: number) => {
       ))
     }
   </div>
+  <p class="sample-note">Apart from Garry Tan’s, these testimonials are illustrative samples.</p>
 
   <script is:inline>
     // Lets the carousel fade in and auto-advance only when motion is allowed.
@@ -362,7 +363,6 @@ const slotFor = (i: number) => {
     right: 12px;
     bottom: 12px;
     overflow: hidden;
-    border: 1px solid var(--border-faint);
     border-radius: var(--r-sm);
     transition: all 700ms cubic-bezier(0.65, 0, 0.35, 1);
   }
@@ -446,6 +446,13 @@ const slotFor = (i: number) => {
     font-weight: 500;
     letter-spacing: -0.065px;
     color: var(--text-strong);
+  }
+
+  .sample-note {
+    margin-top: -28px;
+    font-size: 12px;
+    color: var(--text-caption);
+    text-align: center;
   }
 
   /* Pager: same indicator as the Network showcase (minus its pause button). */

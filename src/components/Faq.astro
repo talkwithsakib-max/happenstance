@@ -11,6 +11,8 @@ import you from '../assets/faq/you.png';
 import arrow from '../assets/faq/arrow-blue.svg?url';
 
 const total = String(allQuestions.length).padStart(2, '0');
+// The tab that opens first is the one holding the opening question.
+const initialGroup = Math.max(0, faqGroups.findIndex((g) => g.questions.some((q) => q.number === initialQuestion)));
 const pad = (n: number) => String(n).padStart(2, '0');
 ---
 
@@ -25,9 +27,27 @@ const pad = (n: number) => String(n).padStart(2, '0');
 
   <div class="layout" data-faq data-active={initialQuestion}>
     <div class="questions">
+      <!-- Topic tabs. Without scripting they stay hidden and every group shows with its label. -->
+      <div class="tabs" role="tablist" aria-label="Question topics">
+        {
+          faqGroups.map((group, i) => (
+            <button
+              class:list={['tab', { 'is-active': i === initialGroup }]}
+              type="button"
+              role="tab"
+              id={`faq-tab-${i}`}
+              aria-selected={i === initialGroup ? 'true' : 'false'}
+              aria-controls={`faq-group-${i}`}
+              data-tab={i}
+            >
+              <span class="tab-inner">{group.label}</span>
+            </button>
+          ))
+        }
+      </div>
       {
-        faqGroups.map((group) => (
-          <div class="group">
+        faqGroups.map((group, i) => (
+          <div class="group" id={`faq-group-${i}`} role="tabpanel" aria-labelledby={`faq-tab-${i}`} data-group={i}>
             <p class="group-label">{group.label}</p>
             <ul>
               {group.questions.map((q) => (
@@ -188,6 +208,22 @@ const pad = (n: number) => String(n).padStart(2, '0');
       if (el) playAnswer(el, seqs.get(el)!).catch(() => {});
     };
 
+    const tabs = [...root.querySelectorAll<HTMLButtonElement>('[data-tab]')];
+    const groups = [...root.querySelectorAll<HTMLElement>('[data-group]')];
+    const groupOf = (number: number) =>
+      groups.findIndex((g) => g.querySelector(`[data-item="${number}"]`));
+    let activeGroup = Math.max(0, groupOf(active ?? 0));
+
+    const renderGroups = () => {
+      tabs.forEach((tab, i) => {
+        const on = i === activeGroup;
+        tab.classList.toggle('is-active', on);
+        tab.setAttribute('aria-selected', String(on));
+        tab.tabIndex = on ? 0 : -1;
+      });
+      groups.forEach((g, i) => (g.hidden = i !== activeGroup));
+    };
+
     const render = () => {
       items.forEach((item) => {
         const number = Number(item.dataset.item);
@@ -199,12 +235,15 @@ const pad = (n: number) => String(n).padStart(2, '0');
       if (active !== null) count.textContent = String(active).padStart(2, '0');
     };
 
-    root.addEventListener('click', (event) => {
-      const target = (event.target as HTMLElement).closest<HTMLElement>('[data-ask]');
-      if (!target) return;
-      const number = Number(target.dataset.ask);
-      // On small screens the list is an accordion, so a second tap closes the item.
+    // Opens a question: on small screens the list is an accordion, so a second tap closes it.
+    const select = (number: number) => {
       active = mobile.matches && active === number ? null : number;
+      // An "Ask next" chip can point into another topic; bring its tab along.
+      const group = groupOf(number);
+      if (group >= 0 && group !== activeGroup) {
+        activeGroup = group;
+        renderGroups();
+      }
       const from = card.offsetHeight;
       render();
       // Ease the chat card to the new answer's height instead of snapping.
@@ -218,7 +257,36 @@ const pad = (n: number) => String(n).padStart(2, '0');
         }
       }
       play(active);
+    };
+
+    root.addEventListener('click', (event) => {
+      const tab = (event.target as HTMLElement).closest<HTMLElement>('[data-tab]');
+      if (tab) {
+        const index = Number(tab.dataset.tab);
+        if (index === activeGroup) return;
+        activeGroup = index;
+        renderGroups();
+        // A new topic opens its first answer, so the chat card always matches the list.
+        const first = groups[index].querySelector<HTMLElement>('[data-ask]');
+        if (first && !mobile.matches) select(Number(first.dataset.ask));
+        return;
+      }
+      const target = (event.target as HTMLElement).closest<HTMLElement>('[data-ask]');
+      if (target) select(Number(target.dataset.ask));
     });
+
+    // Arrow keys move between tabs, as in any tab list.
+    root.querySelector('[role="tablist"]')?.addEventListener('keydown', (event) => {
+      const key = (event as KeyboardEvent).key;
+      if (key !== 'ArrowRight' && key !== 'ArrowLeft') return;
+      event.preventDefault();
+      const next = (activeGroup + (key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length;
+      tabs[next].focus();
+      tabs[next].click();
+    });
+
+    root.classList.add('has-tabs');
+    renderGroups();
 
     // Switching layouts shows answers finished rather than half-built.
     mobile.addEventListener('change', () => {
@@ -245,29 +313,99 @@ const pad = (n: number) => String(n).padStart(2, '0');
     padding-block: var(--section-y);
   }
 
+  /* Stacked: the chat card on top, the topic tabs below it, then that topic's questions. */
   .layout {
     display: flex;
-    align-items: flex-start;
-    gap: 24px;
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
   }
 
   .questions {
     display: flex;
-    flex: 1;
-    min-width: 0;
+    width: 100%;
     flex-direction: column;
-    gap: 28px;
-    padding-right: 64px;
+    align-items: center;
+    gap: 20px;
+  }
+
+  /* Topic tabs, styled like the AI Tools tabs: soft white pills, the active one a blue gradient
+     pill inside a thin white ring. */
+  .tabs {
+    display: none;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .tab {
+    border-radius: var(--r-md);
+    background: rgba(255, 255, 255, 0.72);
+    box-shadow: var(--shadow-tab);
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-primary);
+    white-space: nowrap;
+    transition: background-color var(--dur) var(--ease), transform var(--dur) var(--ease);
+  }
+
+  .tab-inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 44px;
+    padding: 0 18px;
+    border-radius: var(--r-md);
+  }
+
+  .tab:not(.is-active):hover {
+    background: var(--surface);
+    transform: translateY(-1px);
+  }
+
+  .tab.is-active {
+    padding: 2px;
+    font-weight: 600;
+    color: #fff;
+  }
+
+  .tab.is-active .tab-inner {
+    height: 40px;
+    background: var(--gradient-blue);
+    box-shadow: var(--shadow-blue-inset);
+  }
+
+  .tab:focus-visible {
+    outline: 2px solid var(--blue-600);
+    outline-offset: 2px;
+  }
+
+  /* With scripting the tabs replace the group labels, and only one group shows at a time. */
+  .has-tabs .tabs {
+    display: flex;
+  }
+
+  .has-tabs .group-label {
+    display: none;
+  }
+
+  .group[hidden] {
+    display: none;
+  }
+
+  .group {
+    width: 100%;
   }
 
   .group ul {
     display: flex;
-    flex-direction: column;
-    gap: 4px;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
   }
 
   .group-label {
-    padding: 0 14px 6px;
+    padding: 0 14px 8px;
+    text-align: center;
     font-size: 13px;
     font-weight: 500;
     color: var(--text-muted);
@@ -282,25 +420,25 @@ const pad = (n: number) => String(n).padStart(2, '0');
   .q {
     display: flex;
     align-items: center;
-    gap: 12px;
-    width: 100%;
-    padding: 11px 12px 11px 14px;
+    gap: 10px;
+    height: 40px;
+    padding: 0 14px;
     border-radius: var(--r-md);
+    background: rgba(255, 255, 255, 0.55);
     text-align: left;
+    white-space: nowrap;
     transition: background-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
   }
 
   .num {
     flex-shrink: 0;
-    width: 20px;
     font-size: 13px;
     font-weight: 500;
     color: var(--text-muted);
   }
 
   .label {
-    flex: 1;
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 500;
     color: var(--text-body);
     transition: color var(--dur) var(--ease);
@@ -312,7 +450,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
   }
 
   button.q:hover {
-    background: rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.72);
   }
 
   button.q:hover .label {
@@ -320,11 +458,8 @@ const pad = (n: number) => String(n).padStart(2, '0');
   }
 
   .item.is-active .q {
-    width: auto;
-    height: 40px;
-    padding: 12px;
     background: var(--surface);
-    filter: drop-shadow(0 2px 2px rgba(36, 55, 85, 0.07));
+    box-shadow: var(--shadow-tab), 0 8px 18px -10px rgba(36, 55, 85, 0.3);
   }
 
   .item.is-active .num {
@@ -332,12 +467,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
   }
 
   .item.is-active .label {
-    flex: none;
     color: var(--text-primary);
-  }
-
-  .item.is-active .arrow {
-    display: block;
   }
 
   .inline {
@@ -345,8 +475,8 @@ const pad = (n: number) => String(n).padStart(2, '0');
   }
 
   .contact {
-    padding-inline: 14px;
-    font-size: 15px;
+    padding-top: 4px;
+    font-size: 14px;
     color: var(--text-body);
   }
 
@@ -360,10 +490,12 @@ const pad = (n: number) => String(n).padStart(2, '0');
   /* Answer card */
   .card {
     display: flex;
-    flex: 0 0 690px;
+    order: -1;
+    width: 640px;
+    max-width: 100%;
     flex-direction: column;
     gap: 0; /* the active thread carries the spacing so it can collapse to nothing */
-    padding: 20px 28px 28px;
+    padding: 16px 22px 22px;
     overflow: hidden; /* clips content while the card eases between answer heights */
     border-radius: var(--r-xl);
     background: var(--surface);
@@ -374,8 +506,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
     display: flex;
     align-items: center;
     gap: 10px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid var(--border-soft);
+    padding-bottom: 4px;
   }
 
   .mark {
@@ -405,12 +536,12 @@ const pad = (n: number) => String(n).padStart(2, '0');
     position: relative;
     display: flex;
     flex-direction: column;
-    gap: 24px;
-    margin-bottom: 24px; /* space above the input, kept even when the thread is collapsed */
+    gap: 18px;
+    margin-bottom: 18px; /* space above the input, kept even when the thread is collapsed */
   }
 
   .thread > :first-child {
-    margin-top: 24px;
+    margin-top: 18px;
   }
 
   /* While an answer builds, the thread grows from zero height; overflow stays clipped. */
@@ -430,10 +561,10 @@ const pad = (n: number) => String(n).padStart(2, '0');
   }
 
   .bubble {
-    padding: 10px 16px;
+    padding: 9px 14px;
     border-radius: var(--r-md);
     background: var(--text-primary);
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 500;
     color: #fff;
   }
@@ -468,10 +599,10 @@ const pad = (n: number) => String(n).padStart(2, '0');
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 8px 8px 8px 16px;
+    padding: 6px 6px 6px 14px;
     border-radius: var(--r-md);
     background: var(--bg-soft);
-    font-size: 15px;
+    font-size: 14px;
     color: var(--text-placeholder);
   }
 
@@ -513,6 +644,35 @@ const pad = (n: number) => String(n).padStart(2, '0');
     left: var(--caret-x, 0);
   }
 
+  /* On phones the three tabs share the row equally instead of pushing the page sideways. */
+  @media (max-width: 767px) {
+    .tabs {
+      align-self: stretch;
+    }
+
+    .tabs {
+      gap: 6px;
+    }
+
+    .tab {
+      flex: 1;
+      min-width: 0;
+      font-size: 13px;
+      white-space: normal;
+      text-align: center;
+      line-height: 1.2;
+    }
+
+    .tab-inner {
+      height: 48px;
+      padding: 0 8px;
+    }
+
+    .tab.is-active .tab-inner {
+      height: 44px;
+    }
+  }
+
   /* Accordion on smaller screens */
   @media (max-width: 1023px) {
     .layout {
@@ -520,24 +680,45 @@ const pad = (n: number) => String(n).padStart(2, '0');
     }
 
     .questions {
-      width: 100%;
-      padding-right: 0;
+      align-items: stretch;
     }
 
     .card {
       display: none;
     }
 
+    .group ul {
+      flex-direction: column;
+      flex-wrap: nowrap;
+      gap: 4px;
+    }
+
     .item {
       align-items: stretch;
     }
 
-    .item.is-active .q {
-      width: 100%;
+    .q {
+      height: auto;
+      padding: 11px 12px 11px 14px;
+      background: transparent;
+      white-space: normal;
     }
 
-    .item.is-active .label {
+    .num {
+      width: 20px;
+    }
+
+    .label {
       flex: 1;
+      font-size: 15px;
+    }
+
+    .item.is-active .q {
+      box-shadow: 0 2px 4px rgba(36, 55, 85, 0.07);
+    }
+
+    .contact {
+      padding-inline: 14px;
     }
 
     button.q .arrow {

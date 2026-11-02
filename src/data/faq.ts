@@ -47,7 +47,7 @@ export const faqGroups: QuestionGroup[] = [
         number: 2,
         question: 'How does the search work?',
         answer: {
-          text: 'Just type a natural language query like “fintech PMs in NYC” or paste a job description. Our AI reads your intent, searches every network you’ve connected, and ranks results with trait scores and the mutual connections who can introduce you.',
+          text: 'Describe who you need, like “fintech PMs in NYC”, or paste a job description. We search every network you’ve connected and rank people by fit, with the mutual who can introduce you.',
           example: {
             query: 'fintech PMs in NYC',
             results: [

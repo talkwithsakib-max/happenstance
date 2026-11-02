@@ -391,22 +391,6 @@ const steps = [
     box-shadow: var(--shadow-card);
   }
 
-  /* Frame border as an overlay, so the step 1 watercolor can run edge to edge without it. */
-  .visual::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: 2;
-    border: 1px solid var(--surface);
-    border-radius: inherit;
-    pointer-events: none;
-    transition: opacity 500ms var(--ease);
-  }
-
-  .visual:has(:global(.cx.is-active))::after {
-    opacity: 0;
-  }
-
   .visual :global(.frame) {
     position: absolute;
     inset: 0;
