@@ -2,7 +2,7 @@
 // toggle(true) plays the step from the start, toggle(false) drops back to the finished frame.
 // Concepts follow happenstance.ai's own showcase:
 // - Map: the network bursts out of "You" along its lines, then the groups and ranking land.
-// - Friends: rings open, friends and groups join, and a second ring of people fills in.
+// - Friends: the discs open, friends and groups join, and the path to a friend of a friend draws.
 // - Search: the query types, a sweep lights up everyone searched, then the warm path draws.
 
 import { createSequence, EASE_SETTLE } from './motion';
@@ -161,7 +161,8 @@ export function initFriends(root: HTMLElement) {
     play($('[data-glow]'), [{ opacity: 0, transform: 'scale(0.6)' }, { opacity: 1, transform: 'none' }], {
       duration: 1000,
     });
-    $$('[data-ring]').forEach((ring, i) =>
+    // The discs are in paint order (outer first); open them from the centre outwards.
+    $$('[data-ring]').reverse().forEach((ring, i) =>
       play(ring, [{ opacity: 0, transform: 'scale(0.7)' }, { opacity: 1, transform: 'none' }], {
         duration: 900,
         delay: 80 + i * 140,
@@ -178,28 +179,11 @@ export function initFriends(root: HTMLElement) {
     );
     play($('[data-add]'), popIn, { duration: 560, delay: 1020, easing: EASE_SETTLE });
 
-    // Groups join, bringing their members.
+    // Groups join, and the legend counts up the wider network they bring.
     $$('[data-pill]').forEach((pill, i) => {
       play(pill, rise, { duration: 520, delay: 1250 + i * 150 });
       count(pill.querySelector('[data-count]')!, 1300 + i * 150, 800);
     });
-    $$('[data-member]').forEach((el, i) =>
-      play(el, burst(el, HUB, 0.3), { duration: 600, delay: 1350 + i * 80, easing: EASE_SETTLE }),
-    );
-
-    // Their networks fill the outer ring, going round it.
-    const second = $$('[data-second]').sort(
-      (a, b) =>
-        Math.atan2(Number(a.dataset.cy) - HUB.y, Number(a.dataset.cx) - HUB.x) -
-        Math.atan2(Number(b.dataset.cy) - HUB.y, Number(b.dataset.cx) - HUB.x),
-    );
-    second.forEach((el, i) =>
-      play(el, [{ opacity: 0, transform: 'scale(0.3)' }, { opacity: 0.8, transform: 'none' }], {
-        duration: 520,
-        delay: 1800 + i * 70,
-        easing: EASE_SETTLE,
-      }),
-    );
     play($('[data-legend]'), rise, { duration: 520, delay: 1700 });
     $$('[data-legend] [data-count]').forEach((el, i) => count(el, 1800 + i * 120, i === 2 ? 1300 : 700));
 

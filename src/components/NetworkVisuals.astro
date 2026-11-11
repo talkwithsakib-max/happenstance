@@ -1,8 +1,8 @@
 ---
 // Steps 2–4 of the Network showcase, rebuilt from Figma (nodes 228:1224, 228:1697, 252:1126).
 // The server HTML is each finished Figma frame. Motion (network-steps.ts) follows the concept of
-// happenstance.ai's own showcase: the map bursts out of "You", friends and groups widen it to a
-// second ring, and a search sweeps the network before lighting up the warm path.
+// happenstance.ai's own showcase: the map bursts out of "You", friends and groups join and reach a
+// friend of a friend, and a search sweeps the network before lighting up the warm path.
 import { Image } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
 
@@ -27,9 +27,9 @@ import lineTokyo from '../assets/network/map/line-tokyo.svg?raw';
 import lineSydney from '../assets/network/map/line-sydney.svg?raw';
 
 import glow from '../assets/network/friends/glow.svg?url';
-import ring1 from '../assets/network/friends/ring-1.svg?url';
-import ring2 from '../assets/network/friends/ring-2.svg?url';
-import ring3 from '../assets/network/friends/ring-3.png';
+import disc1 from '../assets/network/friends/disc-1.svg?url';
+import disc2 from '../assets/network/friends/disc-2.svg?url';
+import disc3 from '../assets/network/friends/disc-3.svg?url';
 import pulse from '../assets/network/friends/pulse.svg?url';
 import plus from '../assets/network/friends/plus.svg?url';
 import dot2nd from '../assets/network/friends/dot-2nd.png';
@@ -40,16 +40,6 @@ import emma from '../assets/network/friends/emma.png';
 import omar from '../assets/network/friends/omar.png';
 import olivia from '../assets/network/friends/olivia.png';
 import maya from '../assets/network/friends/maya.png';
-import avatar1 from '../assets/hero/avatar-1.jpg';
-import avatar2 from '../assets/hero/avatar-2.jpg';
-import avatar3 from '../assets/hero/avatar-3.jpg';
-import avatar4 from '../assets/hero/avatar-4.jpg';
-import avatar5 from '../assets/hero/avatar-5.jpg';
-import alex from '../assets/jobs/who-you-know/alex.png';
-import drew from '../assets/jobs/who-you-know/drew.png';
-import ishan from '../assets/jobs/who-you-know/ishan.png';
-import jack from '../assets/jobs/who-you-know/jack-ng.png';
-import kevin from '../assets/jobs/who-you-know/kevin-wang.png';
 
 import searchIcon from '../assets/network/search/search.svg?url';
 import n0 from '../assets/network/search/n0.png';
@@ -124,29 +114,9 @@ const friends = [
   person(omar, 269.5, 314, 48, [10, 7], 20),
   person(olivia, 193.29, 182, 48, [10, 7], 20),
 ];
-// Hidden in Figma as the "wider network" layer: group members and second-degree people.
-const members = [
-  person(ny, 314.84, 85.18, 36, [19, 11], 38),
-  person(bangalore, 407.14, 308, 36, [19, 11], 38),
-  person(lagos, 322.47, 376.56, 36, [19, 11], 38),
-  person(london, 128.68, 271.34, 36, [19, 11], 38),
-  person(tokyo, 128.68, 192.66, 36, [19, 11], 38),
-];
-const secondDegree = [
-  { src: avatar1, x: 70.86, y: 180.1 },
-  { src: alex, x: 126.76, y: 83.26 },
-  { src: avatar2, x: 223.6, y: 27.36 },
-  { src: drew, x: 482.47, y: 162.12 },
-  { src: avatar3, x: 490.78, y: 280.91 },
-  { src: ishan, x: 434.88, y: 386.05 },
-  { src: avatar4, x: 331.76, y: 445.58 },
-  { src: jack, x: 227.24, y: 445.58 },
-  { src: avatar5, x: 124.12, y: 386.05 },
-  { src: kevin, x: 69.92, y: 288.26 },
-];
 const friendGroups = [
-  { name: 'Stanford GSB', count: '1.2k', color: '#d97706', x: 137, y: 106 },
-  { name: 'YC W24', count: '418', color: '#8b5cf6', x: 387, y: 230 },
+  { name: 'Stanford GSB', count: '1.2k', color: '#8b5cf6', x: 137, y: 106 },
+  { name: 'YC W24', count: '418', color: '#d97706', x: 387, y: 230 },
   { name: 'Ex-Stripe', count: '236', color: '#16a34a', x: 160, y: 369 },
 ];
 // Spokes from "You" to each friend; the first (to Sarah) is the highlighted one.
@@ -240,9 +210,10 @@ const spot = (p: { x: number; y: number }, size: number) => `left:${p.x}px;top:$
 <div class="frame nv" data-frame="2" data-step-visual="friends" role="img" aria-label={labels[1]}>
   <div class="nv-stage" aria-hidden="true">
     <img class="nv-glow" src={glow} alt="" width="300" height="300" style="left:143.5px;top:100px" data-glow />
-    <img class="nv-ring" src={ring1} alt="" width="176" height="176" style="left:205.5px;top:162px" data-ring />
-    <img class="nv-ring" src={ring2} alt="" width="304" height="304" style="left:141.5px;top:98px" data-ring />
-    <Image class="nv-ring" src={ring3} alt="" width={432} densities={[1, 2]} style="left:77.5px;top:34px" data-ring loading="lazy" />
+    <!-- Soft filled discs, outer to inner; each scales from the shared centre at 293.5, 250. -->
+    <img class="nv-ring" src={disc3} alt="" width="472" height="472" style="left:57.5px;top:10px;transform-origin:236px 240px" data-ring />
+    <img class="nv-ring" src={disc2} alt="" width="344" height="344" style="left:121.5px;top:74px;transform-origin:172px 176px" data-ring />
+    <img class="nv-ring" src={disc1} alt="" width="216" height="216" style="left:185.5px;top:138px;transform-origin:108px 112px" data-ring />
 
     <svg class="nv-svg" viewBox="0 0 587 560" width="587" height="560">
       <defs>
@@ -263,20 +234,6 @@ const spot = (p: { x: number; y: number }, size: number) => `left:${p.x}px;top:$
       <path class="nv-dashed" d={SARAH_TO_MAYA} mask="url(#nv-warm-reveal)" />
     </svg>
 
-    {
-      secondDegree.map((p) => (
-        <span class="nv-person nv-2nd" style={spot(p, 28)} data-second {...{ 'data-cx': p.x + 14, 'data-cy': p.y + 14 }}>
-          <Image class="nv-photo" src={p.src} alt="" width={28} densities={[1, 2]} loading="lazy" />
-        </span>
-      ))
-    }
-    {
-      members.map((p) => (
-        <span class="nv-person" style={spot(p, p.size)} data-member {...{ 'data-cx': p.x + p.size / 2, 'data-cy': p.y + p.size / 2 }}>
-          <Image class="nv-shot" src={p.src} alt="" width={p.size + p.grow} densities={[1, 2]} style={shotStyle(p)} loading="lazy" />
-        </span>
-      ))
-    }
     {
       friends.map((p) => (
         <span class="nv-person" style={spot(p, p.size)} data-friend {...{ 'data-cx': p.x + p.size / 2, 'data-cy': p.y + p.size / 2 }}>
@@ -323,9 +280,9 @@ const spot = (p: { x: number; y: number }, size: number) => `left:${p.x}px;top:$
 <div class="frame nv" data-frame="3" data-step-visual="search" role="img" aria-label={labels[2]}>
   <div class="nv-stage" aria-hidden="true">
     <img class="nv-glow" src={glow} alt="" width="300" height="300" style="left:143.5px;top:100px" data-glow />
-    <img class="nv-ring" src={ring1} alt="" width="176" height="176" style="left:205.5px;top:162px" />
-    <img class="nv-ring" src={ring2} alt="" width="304" height="304" style="left:141.5px;top:98px" />
-    <Image class="nv-ring" src={ring3} alt="" width={432} densities={[1, 2]} style="left:77.5px;top:34px" loading="lazy" />
+    <img class="nv-ring" src={disc3} alt="" width="472" height="472" style="left:57.5px;top:10px" />
+    <img class="nv-ring" src={disc2} alt="" width="344" height="344" style="left:121.5px;top:74px" />
+    <img class="nv-ring" src={disc1} alt="" width="216" height="216" style="left:185.5px;top:138px" />
     <span class="nv-sonar" style="left:77.5px;top:34px" data-sonar></span>
 
     <svg class="nv-svg" viewBox="0 0 587 560" width="587" height="560">
@@ -422,19 +379,6 @@ const spot = (p: { x: number; y: number }, size: number) => `left:${p.x}px;top:$
     position: absolute;
     max-width: none;
     height: auto;
-  }
-
-  .nv-photo {
-    width: 100%;
-    height: 100%;
-    border: 2px solid #fff;
-    border-radius: 50%;
-    object-fit: cover;
-    box-shadow: 0 4px 10px -4px rgba(15, 23, 41, 0.25);
-  }
-
-  .nv-2nd {
-    opacity: 0.8;
   }
 
   .nv-halo,
