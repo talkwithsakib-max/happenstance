@@ -6,8 +6,6 @@
 import { Image } from 'astro:assets';
 import BotMark from './BotMark.astro';
 
-import bg from '../assets/network/connect/bg.png';
-import grain from '../assets/hero/grain.png';
 import you from '../assets/jobs/get-referred/you.png';
 import outlook from '../assets/network/connect/outlook.svg?url';
 import linkedin from '../assets/network/connect/linkedin.svg?url';
@@ -47,11 +45,6 @@ const path = (a: number[], b: number[]) => `M${a[0]} ${a[1]}L${b[0]} ${b[1]}`;
 ---
 
 <div class:list={['frame', 'cx', { 'is-active': active }]} data-frame="0" data-connect role="img" aria-label={label}>
-  <div class="cx-bg" aria-hidden="true">
-    <Image src={bg} alt="" widths={[650, 1024]} sizes="650px" loading="lazy" />
-    <div class="cx-grain" style={`background-image:url(${grain.src})`}></div>
-  </div>
-
   <div class="cx-stage" aria-hidden="true">
     <svg class="cx-lines" viewBox="0 0 650 560" width="650" height="560">
       <g class="cx-rails">
@@ -108,25 +101,6 @@ const path = (a: number[], b: number[]) => `M${a[0]} ${a[1]}L${b[0]} ${b[1]}`;
     container-type: size;
   }
 
-  .cx-bg,
-  .cx-bg img,
-  .cx-grain {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-  }
-
-  .cx-bg img {
-    object-fit: cover;
-  }
-
-  .cx-grain {
-    background-size: 50px 50px;
-    mix-blend-mode: overlay;
-    opacity: 0.35;
-  }
-
   /* The Figma frame at its native size, scaled to whatever the visual box is. */
   .cx-stage {
     position: absolute;
@@ -145,7 +119,7 @@ const path = (a: number[], b: number[]) => `M${a[0]} ${a[1]}L${b[0]} ${b[1]}`;
   }
 
   .cx-rails path {
-    stroke: #fff;
+    stroke: #cfd6e2;
     stroke-width: 1.5;
     stroke-dasharray: 2 2;
   }
