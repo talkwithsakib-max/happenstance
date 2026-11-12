@@ -142,7 +142,7 @@ const path = (a: number[], b: number[]) => `M${a[0]} ${a[1]}L${b[0]} ${b[1]}`;
     width: 56px;
     height: 56px;
     border-radius: 8px;
-    background: #fff;
+    background: var(--bg-subtle);
     box-shadow: var(--shadow-card);
   }
 
@@ -207,7 +207,7 @@ const path = (a: number[], b: number[]) => `M${a[0]} ${a[1]}L${b[0]} ${b[1]}`;
     width: 300px;
     padding: 10px;
     border-radius: 8px;
-    background: #fff;
+    background: var(--bg-subtle);
     box-shadow: var(--shadow-card);
     transform-origin: 50% 0;
     transition:
@@ -258,7 +258,7 @@ const path = (a: number[], b: number[]) => `M${a[0]} ${a[1]}L${b[0]} ${b[1]}`;
     width: 32px;
     height: 32px;
     border-radius: 6px;
-    background: #f4f5f7;
+    background: #fff;
   }
 
   .cx-card-info {
@@ -286,7 +286,8 @@ const path = (a: number[], b: number[]) => `M${a[0]} ${a[1]}L${b[0]} ${b[1]}`;
     flex-shrink: 0;
     padding: 3px 8px;
     border-radius: 4px;
-    background: #111;
+    background: var(--btn-dark);
+    box-shadow: var(--btn-dark-shadow);
     font-size: 10px;
     font-weight: 600;
     color: #fff;

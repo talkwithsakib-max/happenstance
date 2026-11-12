@@ -3,17 +3,15 @@ import { Image } from 'astro:assets';
 import Logo from './Logo.astro';
 
 import grain from '../assets/footer/grain.png';
-import watercolor from '../assets/footer/watercolor.png';
-import artMask from '../assets/footer/etching-mask.svg?url';
-import wordmark from '../assets/footer/wordmark-flowers.png';
+import watercolor from '../assets/footer/watercolor-lake.png';
 import soc2 from '../assets/security/soc2.png';
 import dti from '../assets/security/dti.png';
 import linkedin from '../assets/footer/linkedin.svg?url';
 import x from '../assets/footer/x.svg?url';
 import discord from '../assets/footer/discord.svg?url';
 
-// Content from the previous happenstance.ai footer; layout follows littlebird.ai.
-// Footer destinations are not designed yet, so items render without links.
+// Content from the previous happenstance.ai footer. Layout follows Corgi's footer (via Mobbin): the
+// links on a clean surface, then the painting as its own full-strength band underneath.
 const columns: { title: string; items: (string | [string, string])[] }[] = [
   { title: 'Product', items: ['Chat', ['iPhone app', 'New'], 'Pricing', 'Developers'] },
   { title: 'Use cases', items: ['Founders', 'Investors', 'Sales', 'Recruiting', 'Fundraising', 'Job seekers', 'Communities'] },
@@ -34,27 +32,29 @@ const socials = [
 ---
 
 <footer class="footer">
-  <div class="bg" aria-hidden="true">
-    <div class="grain" style={`background-image:url(${grain.src});opacity:.25`}></div>
-    <div class="art" style={`--edge-fade:url("${artMask}")`}>
-      <Image src={watercolor} alt="" widths={[1792]} sizes="1700px" loading="lazy" />
-    </div>
-  </div>
-
-  <div class="container inner">
-    <div class="top">
+  <div class="container top">
+    <div class="brand">
       <Logo />
+      <p class="tagline">The AI search engine for the network you actually have.</p>
       <ul class="social">
         {
           socials.map((s) => (
             <li>
               <span class="social-icon" role="img" aria-label={s.name}>
-                <img src={s.icon} alt="" width="20" height="20" />
+                <img src={s.icon} alt="" width="18" height="18" />
               </span>
             </li>
           ))
         }
       </ul>
+      <div class="badges">
+        <a href="https://www.aicpa.org/soc4so" target="_blank" rel="noopener" aria-label="SOC 2 Compliant">
+          <Image src={soc2} alt="" width={36} height={36} densities={[1, 2]} loading="lazy" />
+        </a>
+        <a href="https://dt-reg.org/registry/services/71" target="_blank" rel="noopener" aria-label="DTI Trust Level 2">
+          <Image src={dti} alt="" width={36} height={36} densities={[1, 2]} loading="lazy" />
+        </a>
+      </div>
     </div>
 
     <nav class="links" aria-label="Footer">
@@ -74,119 +74,74 @@ const socials = [
         ))
       }
     </nav>
+  </div>
 
-    <div class="divider">
-      <span class="line"></span>
-      <div class="badges">
-        <a href="https://www.aicpa.org/soc4so" target="_blank" rel="noopener" aria-label="SOC 2 Compliant">
-          <Image src={soc2} alt="" width={40} height={40} densities={[1, 2]} loading="lazy" />
-        </a>
-        <a href="https://dt-reg.org/registry/services/71" target="_blank" rel="noopener" aria-label="DTI Trust Level 2">
-          <Image src={dti} alt="" width={40} height={40} densities={[1, 2]} loading="lazy" />
-        </a>
-      </div>
-      <span class="line"></span>
-    </div>
+  <div class="container meta">
+    <p class="copyright">© 2026 Happenstance, Inc.</p>
+    <ul class="legal">
+      <li><span class="link">Privacy Policy</span></li>
+      <li><span class="link">Terms of Service</span></li>
+    </ul>
+  </div>
 
-    <div class="bottom">
-      <p>© 2026 Happenstance, Inc.</p>
-      <ul class="legal">
-        <li><span class="link">Privacy</span></li>
-        <li><span class="link">Terms</span></li>
-      </ul>
-    </div>
-
-    <div class="wordmark">
-      <Image src={wordmark} alt="happenstance" widths={[1168, 2336]} sizes="(max-width: 1232px) 95vw, 1168px" loading="lazy" />
-    </div>
+  {/* The painting gets its own band at full strength; only its top edge melts into the surface. */}
+  <div class="scene" aria-hidden="true">
+    <Image src={watercolor} alt="" widths={[1376, 1792]} sizes="100vw" loading="lazy" />
+    <div class="grain" style={`background-image:url(${grain.src});opacity:.4`}></div>
+    <span class="watermark">Happenstance</span>
   </div>
 </footer>
 
 <style>
+  /* Same background as the section above, so the page flows straight into the footer. */
   .footer {
     position: relative;
     overflow: hidden;
     background: var(--bg-page);
   }
 
-  .bg {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
+  .top {
+    display: grid;
+    grid-template-columns: 210px minmax(0, 1fr);
+    gap: 40px;
+    padding-block: 56px 32px;
   }
 
-  /* A pale-sky watercolor behind the wordmark; it fades in from transparent above the legal row. */
-  .art {
-    position: absolute;
-    left: 50%;
-    bottom: 0;
-    /* At least Figma's 1700px, and always wider than the screen, so the painting runs edge to
-       edge on wide displays instead of stopping short of one side. */
-    width: max(1700px, 100%);
-    height: 720px;
-    translate: -50% 0;
-    mask-image: var(--edge-fade);
-    -webkit-mask-image: var(--edge-fade);
-    mask-size: 100% 100%;
-    -webkit-mask-size: 100% 100%;
-  }
-
-  .art img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .inner {
-    position: relative;
+  .brand {
     display: flex;
     flex-direction: column;
-    gap: 32px;
-    padding-block: 72px;
+    align-items: flex-start;
+    gap: 14px;
   }
 
-  .top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+  .tagline {
+    max-width: 200px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--text-body);
   }
 
-  .social {
-    display: flex;
-    gap: 8px;
-  }
-
-  .social-icon {
-    display: grid;
-    place-items: center;
-    width: 32px;
-    height: 32px;
-    border-radius: var(--r-sm);
-    background: rgba(0, 0, 0, 0.05);
-    transition: background-color var(--dur) var(--ease);
-  }
-
-  .social-icon:hover {
-    background: rgba(0, 0, 0, 0.09);
+  .copyright {
+    font-size: 13px;
+    color: var(--text-body);
   }
 
   .links {
     display: grid;
     grid-template-columns: repeat(6, minmax(0, 1fr));
-    gap: 40px 24px;
-    padding-top: 16px;
+    gap: 32px 16px;
   }
 
   .column {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 14px;
   }
 
   .column ul {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 9px;
   }
 
   .column li {
@@ -196,14 +151,16 @@ const socials = [
   }
 
   .column-title {
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.9px;
+    text-transform: uppercase;
+    color: var(--text-primary);
   }
 
   .link {
-    font-size: 14px;
-    color: var(--text-strong);
+    font-size: 13px;
+    color: var(--text-body);
     white-space: nowrap;
     cursor: default;
     transition: color var(--dur) var(--ease);
@@ -214,53 +171,25 @@ const socials = [
   }
 
   .pill {
-    padding: 3px 8px;
+    padding: 2px 7px;
     border-radius: var(--r-pill);
     background: var(--gradient-blue);
     box-shadow: var(--shadow-blue-inset);
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 600;
     color: #fff;
     white-space: nowrap;
   }
 
-  /* Thin rule with the compliance badges in the middle. */
-  .divider {
-    display: flex;
-    align-items: center;
-    gap: 24px;
-    padding-top: 24px;
-  }
-
-  .line {
-    flex: 1;
-    height: 1px;
-    background: rgba(0, 0, 0, 0.08);
-  }
-
-  .badges {
-    display: flex;
-    gap: 12px;
-  }
-
-  .badges img {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    transition: transform 300ms var(--ease);
-  }
-
-  .badges a:hover img {
-    transform: rotate(-8deg);
-  }
-
-  .bottom {
+  /* Copyright on the left, legal links on the right. */
+  .meta {
+    position: relative;
+    z-index: 1;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 16px;
-    font-size: 13px;
-    color: var(--text-body);
+    padding-bottom: 8px;
   }
 
   .legal {
@@ -270,52 +199,95 @@ const socials = [
 
   .legal .link {
     font-size: 13px;
-    color: var(--text-body);
   }
 
   .legal .link:hover {
-    color: var(--text-primary);
     text-decoration: underline;
     text-underline-offset: 3px;
   }
 
-  .wordmark {
+  .badges {
+    display: flex;
+    gap: 10px;
+  }
+
+  .badges img {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    transition: transform 300ms var(--ease);
+  }
+
+  .badges a:hover img {
+    transform: rotate(-8deg);
+  }
+
+  .social {
+    display: flex;
+    gap: 6px;
+  }
+
+  .social-icon {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--r-sm);
+    background: rgba(0, 0, 0, 0.06);
+    transition: background-color var(--dur) var(--ease);
+  }
+
+  .social-icon:hover {
+    background: rgba(0, 0, 0, 0.09);
+  }
+
+  .scene {
     position: relative;
-    height: 209px;
+    height: clamp(130px, 15vw, 220px);
+    margin-top: -24px;
+    mask-image: linear-gradient(transparent, #000 26%);
+    -webkit-mask-image: linear-gradient(transparent, #000 26%);
   }
 
-  .wordmark img {
+  .scene img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 100%;
+    /* The watercolor is pale; deepen it so it holds its own as a band. */
+    filter: saturate(1.6) contrast(1.3) brightness(0.9);
+  }
+
+  /* The name, very large, in the sky of the painting and cropped by the bottom edge. */
+  .watermark {
     position: absolute;
-    /* Offsets align the export (which includes flower shadows) with the Figma frame. */
-    left: calc(50% + 12px);
-    top: -7px;
-    width: 1168px;
-    height: auto;
-    max-width: none;
-    transform: translateX(-50%);
-  }
-
-  @media (max-width: 1279px) {
-    .wordmark {
-      height: auto;
-      aspect-ratio: 1127 / 160;
-    }
-
-    .wordmark img {
-      top: 0;
-      width: 103.6%;
-    }
+    left: 50%;
+    bottom: -0.13em;
+    translate: -50% 0;
+    font-size: clamp(48px, 11vw, 160px);
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -0.055em;
+    white-space: nowrap;
+    color: rgba(255, 255, 255, 0.55);
+    user-select: none;
   }
 
   @media (max-width: 1100px) {
+    .top {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 32px;
+    }
+
     .links {
       grid-template-columns: repeat(3, minmax(0, 1fr));
     }
   }
 
   @media (max-width: 767px) {
-    .inner {
-      padding-block: 56px;
+    .top {
+      gap: 28px;
+      padding-block: 44px 28px;
     }
 
     .links {
@@ -323,11 +295,7 @@ const socials = [
       gap: 32px 16px;
     }
 
-    .divider {
-      padding-top: 8px;
-    }
-
-    .bottom {
+    .meta {
       flex-direction: column-reverse;
       align-items: flex-start;
     }

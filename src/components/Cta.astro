@@ -304,24 +304,23 @@ const highlights = [
   }
 
   .btn-primary {
-    background: linear-gradient(180deg, #070707 50%, #6d6d6d 137.5%);
-    color: var(--bg-soft);
-    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.25);
+    background: var(--btn-dark);
+    color: #fff;
+    box-shadow: var(--btn-dark-shadow);
   }
 
   .btn-primary:hover {
-    filter: brightness(1.35);
-    box-shadow: 0 14px 24px rgba(0, 0, 0, 0.28);
+    background: var(--btn-dark-hover);
   }
 
   .btn-secondary {
-    background: var(--surface);
+    background: var(--btn-light);
     color: var(--text-primary);
-    box-shadow: 0 1px 1px rgba(15, 23, 41, 0.06);
+    box-shadow: var(--btn-light-shadow);
   }
 
   .btn-secondary:hover {
-    box-shadow: 0 6px 16px -6px rgba(15, 23, 41, 0.2), 0 1px 1px rgba(15, 23, 41, 0.06);
+    background: var(--btn-light-hover);
   }
 
   /* Mobile: show a strip of the wall above the copy. */

@@ -14,6 +14,8 @@ import avatar5 from '../assets/hero/avatar-5.jpg';
 import sarah from '../assets/hero/sarah-chen.png';
 import rahul from '../assets/hero/rahul-mehta.png';
 import emma from '../assets/hero/emma-liu.png';
+import jack from '../assets/jobs/who-you-know/jack-ng.png';
+import olivia from '../assets/jobs/who-you-know/olivia-yao.png';
 
 const avatars = [
   { src: avatar1, pos: '52% 45%' },
@@ -23,11 +25,45 @@ const avatars = [
   { src: avatar5, pos: '50% 20%' },
 ];
 
-const paths = [
-  { name: 'Sarah Chen', role: 'PM at Meta', photo: sarah, initial: 'D', via: 'via Daniel · classmate', tone: 'blue', level: 'strong' },
-  { name: 'Rahul Mehta', role: 'Recruiter at Meta', photo: rahul, initial: 'P', via: 'via Priya · ex-teammate', tone: 'green', level: 'good' },
-  { name: 'Emma Liu', role: 'Engineer at Meta', photo: emma, initial: 'A', via: 'via Alex · friend', tone: 'amber', level: 'good' },
-] as const;
+const people = {
+  sarah: { name: 'Sarah Chen', role: 'PM at Meta', photo: sarah, initial: 'D', via: 'via Daniel · classmate', tone: 'blue' },
+  rahul: { name: 'Rahul Mehta', role: 'Recruiter at Meta', photo: rahul, initial: 'P', via: 'via Priya · ex-teammate', tone: 'green' },
+  emma: { name: 'Emma Liu', role: 'Engineer at Meta', photo: emma, initial: 'A', via: 'via Alex · friend', tone: 'amber' },
+  jack: { name: 'Jack Ng', role: 'Product Manager at Meta', photo: jack, initial: 'A', via: 'via Alex · friend', tone: 'amber' },
+  olivia: { name: 'Olivia Yao', role: 'Staff Data Scientist at Meta', photo: olivia, initial: 'D', via: 'via Drew · ex-teammate', tone: 'green' },
+} as const;
+
+// One search, then two follow-ups that build on it, as on happenstance.ai. A follow-up is typed in
+// the input; on submit the previous answer slides away under the input, the question lands in the
+// box as a chat bubble, and its answer appears below in a form that suits the question.
+const first = {
+  query: 'Who do I know at Meta from my school?',
+  rows: [
+    { ...people.sarah, level: 'strong' },
+    { ...people.rahul, level: 'good' },
+    { ...people.emma, level: 'good' },
+  ],
+} as const;
+
+// Follow-up 1 filters the same three people by team.
+const filter = {
+  query: 'Which of them work on product?',
+  rows: [
+    { ...people.sarah, team: 'Product', match: true },
+    { ...people.rahul, team: 'Recruiting', match: false },
+    { ...people.emma, team: 'Engineering', match: false },
+  ],
+} as const;
+
+// Follow-up 2 drafts the intro request through the strongest mutual.
+const draft = {
+  query: 'Draft an intro to Sarah through Daniel',
+  lead: 'Daniel is your warmest path to Sarah. Ready to send:',
+  message:
+    'Hi Daniel, I saw Sarah Chen is a PM at Meta now. I’m exploring product roles there and would love to hear how she finds it. Since you two were classmates, would you be open to introducing us?',
+} as const;
+
+const queries = [first.query, filter.query, draft.query];
 ---
 
 <section class="hero" aria-labelledby="hero-title">
@@ -66,7 +102,7 @@ const paths = [
       </div>
       <div class="prompt" data-prompt>
         <p class="prompt-text display">
-          <span class="prompt-typed" data-typed>Who do I know at Meta from my school?</span><span
+          <span class="prompt-typed" data-typed data-queries={JSON.stringify(queries)}>{first.query}</span><span
             class="caret"
             aria-hidden="true"></span>
         </p>
@@ -76,30 +112,77 @@ const paths = [
       <ThinkingBot tone="pill" class="prompt-think" />
 
       <!-- The answer comes out from under the input (pattern from exa.ai). -->
-      <div class="answer intro-hide" data-answer role="group" aria-label="Three warm paths to people at Meta">
-        <p class="answer-head intro-hide">
-          <span class="answer-label">3 warm paths at Meta</span>
-          <span class="answer-meta">from <span data-count-to="1284">1,284</span> people mapped</span>
-        </p>
-        <ul class="paths">
-          {
-            paths.map((p, i) => (
-              <li class:list={['path', 'intro-hide', { active: i === 0 }]}>
-                <Image class="path-photo" src={p.photo} alt="" width={40} height={40} densities={[1, 2]} />
-                <div class="path-info">
-                  <p class="path-name">{p.name}</p>
-                  <p class="path-role">{p.role}</p>
-                  <p class="path-via">
-                    <span class:list={['mutual', p.tone]}>{p.initial}</span>
-                    {p.via}
+      <div class="answer intro-hide" data-answer>
+        {/* 1 · The first answer: three warm paths. */}
+        <div class="result is-current" data-result role="group" aria-label="Three warm paths to people at Meta">
+          <p class="answer-head intro-hide">
+            <span class="answer-label">3 warm paths at Meta</span>
+            <span class="answer-meta">from <span data-count-to="1284">1,284</span> people mapped</span>
+          </p>
+          <ul class="paths">
+            {
+              first.rows.map((p, i) => (
+                <li class:list={['path', 'intro-hide', { active: i === 0 }]}>
+                  <Image class="path-photo" src={p.photo} alt="" width={40} height={40} densities={[1, 2]} />
+                  <div class="path-info">
+                    <p class="path-name">{p.name}</p>
+                    <p class="path-role">{p.role}</p>
+                    <p class="path-via">
+                      <span class:list={['mutual', p.tone]}>{p.initial}</span>
+                      {p.via}
+                    </p>
+                  </div>
+                  <StrengthMeter level={p.level} />
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+
+        {/* 2 · Follow-up: the same people, filtered by team. */}
+        <div class="result" data-result role="group" aria-label="One of the three works on product">
+          <p class="bubble intro-hide" data-bubble>{filter.query}</p>
+          <p class="answer-head intro-hide">
+            <span class="answer-label">1 of 3 works on product</span>
+            <span class="answer-meta">filtered by team</span>
+          </p>
+          <ul class="paths">
+            {
+              filter.rows.map((p) => (
+                <li class:list={['mini', 'intro-hide', { match: p.match }]}>
+                  <Image class="mini-photo" src={p.photo} alt="" width={32} height={32} densities={[1, 2]} />
+                  <p class="mini-info">
+                    <span class="path-name">{p.name}</span>
+                    <span class="path-role">{p.role}</span>
                   </p>
-                </div>
-                <StrengthMeter level={p.level} />
-              </li>
-            ))
-          }
-        </ul>
-        <span class="answer-fade" aria-hidden="true"></span>
+                  <span class="team">{p.team}</span>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+
+        {/* 3 · Follow-up: a drafted intro request. */}
+        <div class="result" data-result role="group" aria-label="A drafted intro request to Sarah through Daniel">
+          <p class="bubble intro-hide" data-bubble>{draft.query}</p>
+          <p class="draft-lead intro-hide">{draft.lead}</p>
+          <blockquote class="draft intro-hide">{draft.message}</blockquote>
+          <p class="draft-foot intro-hide">
+            <span class="path-via">
+              <span class="mutual blue">D</span>
+              To Daniel · classmate
+            </span>
+            <span class="draft-send">Send intro request</span>
+          </p>
+        </div>
+      </div>
+
+      {/* The CTA's buttons are their own layer above the card: the card's bottom edge runs in
+          under a frosted strip, so the answer looks like it slides beneath the buttons. */}
+      <div class="answer-cta intro-hide" data-cta>
+        <span class="frost" aria-hidden="true"></span>
+        <button class="btn btn-primary" type="button">Search for free</button>
+        <button class="btn btn-secondary" type="button">Continue with Google</button>
       </div>
     </div>
   </div>
@@ -346,6 +429,126 @@ const paths = [
     text-align: left;
   }
 
+  /* Only the current answer takes space; follow-ups replace it at the same height. */
+  .result {
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+    /* The height of the first answer (label + three rows), so follow-ups never resize the card. */
+    min-height: 264px;
+  }
+
+  /* A follow-up question, shown in the box the way a sent chat message is. */
+  .bubble {
+    align-self: flex-end;
+    max-width: 100%;
+    padding: 6px 12px;
+    border-radius: 14px 14px 4px 14px;
+    background: #ececee;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 20px;
+    color: var(--text-strong);
+  }
+
+  /* Follow-up 1: compact rows with a team tag; the match stays strong, the rest step back. */
+  .mini {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 56px;
+    padding: 0 12px 0 10px;
+    border: 2px solid transparent;
+    border-radius: var(--r-md);
+    background: var(--surface);
+    box-shadow: 0 1px 2px rgba(36, 55, 85, 0.08), 0 4px 10px -6px rgba(36, 55, 85, 0.12);
+  }
+
+  .mini.match {
+    border-color: var(--blue-700);
+    box-shadow: 0 8px 24px -10px rgba(29, 92, 230, 0.35);
+  }
+
+  .mini:not(.match) > * {
+    opacity: 0.45;
+  }
+
+  .mini-photo {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+  }
+
+  .mini-info {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  .team {
+    padding: 3px 9px;
+    border-radius: var(--r-pill);
+    background: var(--bg-subtle);
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-body);
+    white-space: nowrap;
+  }
+
+  .mini.match .team {
+    background: rgba(28, 56, 234, 0.08);
+    color: var(--blue-900);
+  }
+
+  /* Follow-up 2: the drafted message. */
+  .draft-lead {
+    padding-inline: 2px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-strong);
+  }
+
+  .draft {
+    padding: 12px 14px;
+    border-radius: var(--r-md);
+    background: var(--surface);
+    box-shadow: 0 1px 2px rgba(36, 55, 85, 0.08), 0 4px 10px -6px rgba(36, 55, 85, 0.12);
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--text-body);
+  }
+
+  .draft-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-inline: 2px;
+  }
+
+  .draft-send {
+    padding: 6px 12px;
+    border-radius: var(--r-pill);
+    background: var(--gradient-blue);
+    box-shadow: var(--shadow-blue-inset);
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+    white-space: nowrap;
+  }
+
+  /* Between questions the input invites the next one. */
+  .hero[data-intro='playing'] .prompt:not(.is-typing) .prompt-typed:empty::before {
+    content: 'Ask a follow-up';
+    color: var(--text-disabled);
+  }
+
+  .result.is-current {
+    display: flex;
+  }
+
   .answer-head {
     display: flex;
     align-items: center;
@@ -457,15 +660,94 @@ const paths = [
   }
 
   /* The last row fades into the panel. */
-  .answer-fade {
+  /* A frosted strip over the bottom of the card: the last row blurs out under the buttons. */
+  .answer-cta {
+    position: relative;
+    z-index: 4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    /* Pulled up over the bottom of the card, which slides in underneath. */
+    /* Its bottom lines up with the card's bottom edge (56 + 44 + 22 = 122). */
+    margin-top: -122px;
+    padding: 56px 0 22px;
+  }
+
+  /* Blur only, no fill: it spills past the card's bottom edge and fades out on every side, so the
+     card's lower edge dissolves under the buttons without leaving a white band on the painting. */
+  .frost {
     position: absolute;
-    inset: auto 0 0;
-    height: 72px;
+    /* Reaches well past the card (as Intercom's Fin preview melts into its background), with a
+       light mist of the page colour so the edge of the card and the painting blend smoothly. */
+    inset: -24px -160px -110px;
+    background: rgba(242, 242, 242, 0.45);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    /* Full strength across the card's side edges, fading only well outside them. */
+    mask-image: linear-gradient(transparent, #000 40%, #000 80%, transparent),
+      linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent);
+    mask-composite: intersect;
+    -webkit-mask-image: linear-gradient(transparent, #000 40%, #000 80%, transparent),
+      linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent);
+    -webkit-mask-composite: source-in;
     pointer-events: none;
-    background: linear-gradient(rgba(250, 250, 250, 0), #fafafa);
+  }
+
+  /* Same buttons as the CTA section. They sit 24px below the strip's centre; the blur stays put. */
+  .btn {
+    position: relative;
+    top: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 44px;
+    padding: 0 22px;
+    border-radius: var(--r-md);
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
+    transition: transform var(--dur) var(--ease), filter var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+  }
+
+  .btn:active {
+    transform: translateY(1px);
+  }
+
+  .btn-primary {
+    background: var(--btn-dark);
+    color: #fff;
+    box-shadow: var(--btn-dark-shadow);
+  }
+
+  .btn-primary:hover {
+    background: var(--btn-dark-hover);
+  }
+
+  .btn-secondary {
+    background: var(--btn-light);
+    color: var(--text-primary);
+    box-shadow: var(--btn-light-shadow);
+  }
+
+  .btn-secondary:hover {
+    background: var(--btn-light-hover);
   }
 
   @media (max-width: 767px) {
+    .answer-cta {
+      gap: 8px;
+      padding-inline: 12px;
+    }
+
+    .btn {
+      flex: 1;
+      height: 42px;
+      padding: 0 10px;
+      font-size: 13px;
+    }
+
     .hero {
       padding-top: 104px;
       padding-bottom: 56px;

@@ -186,6 +186,39 @@ const pad = (n: number) => String(n).padStart(2, '0');
     const animate = !reducedMotion() && threads.every((t) => t.dataset.motion === 'pending');
     let active: number | null = Number(root.dataset.active);
 
+    // One fixed height for the chat card: the height of its tallest answer, measured on an offscreen
+    // copy (so the live answers' build animations are untouched). Every answer then shows in the same
+    // box, with the input pinned to the bottom.
+    const fitCard = () => {
+      if (mobile.matches) {
+        card.style.height = '';
+        return;
+      }
+      const copy = card.cloneNode(true) as HTMLElement;
+      copy.removeAttribute('aria-live');
+      copy.style.cssText = `position:absolute;left:-9999px;top:0;visibility:hidden;height:auto;width:${card.offsetWidth}px`;
+      copy.querySelectorAll<HTMLElement>('[style]').forEach((el) => el.removeAttribute('style'));
+      copy.querySelectorAll<HTMLElement>('[data-motion]').forEach((el) => (el.dataset.motion = 'done'));
+      copy.querySelectorAll('.is-growing').forEach((el) => el.classList.remove('is-growing'));
+      card.parentElement!.append(copy);
+      const copies = [...copy.querySelectorAll<HTMLElement>('[data-thread]')];
+      let tallest = 0;
+      copies.forEach((thread) => {
+        copies.forEach((t) => (t.hidden = t !== thread));
+        tallest = Math.max(tallest, copy.offsetHeight);
+      });
+      copy.remove();
+      card.style.height = `${Math.ceil(tallest)}px`;
+    };
+    fitCard();
+    document.fonts?.ready.then(fitCard);
+    mobile.addEventListener('change', fitCard);
+    let fitTimer = 0;
+    window.addEventListener('resize', () => {
+      clearTimeout(fitTimer);
+      fitTimer = window.setTimeout(fitCard, 150);
+    });
+
     // One sequence per answer: the chat thread (desktop) and the accordion panel (mobile).
     const seqs = new Map<HTMLElement, Seq>();
     root.querySelectorAll<HTMLElement>('[data-answer]').forEach((el) => {
@@ -244,18 +277,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
         activeGroup = group;
         renderGroups();
       }
-      const from = card.offsetHeight;
       render();
-      // Ease the chat card to the new answer's height instead of snapping.
-      if (animate && !mobile.matches) {
-        const to = card.offsetHeight;
-        if (from !== to) {
-          card.animate([{ height: `${from}px` }, { height: `${to}px` }], {
-            duration: 420,
-            easing: 'cubic-bezier(0.65, 0, 0.35, 1)',
-          });
-        }
-      }
       play(active);
     };
 
@@ -563,7 +585,8 @@ const pad = (n: number) => String(n).padStart(2, '0');
   .bubble {
     padding: 9px 14px;
     border-radius: var(--r-md);
-    background: var(--text-primary);
+    background: var(--btn-dark);
+    box-shadow: var(--btn-dark-shadow);
     font-size: 14px;
     font-weight: 500;
     color: #fff;

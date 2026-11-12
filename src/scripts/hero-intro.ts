@@ -1,5 +1,8 @@
 // Hero intro: the prompt types a question, "submits" it, thinks for a beat, and the answer card
-// comes out from under the input with its warm paths. Everything runs on the Web Animations API, so the whole sequence
+// comes out from under the input with its warm paths. Two follow-up questions then build on it,
+// chat-style: each is typed in the input, and on submit the previous answer slides away under the
+// input, the question lands in the box as a bubble, and its answer appears below at the same
+// height. The demo loops while the hero is on screen. Everything runs on the Web Animations API, so the whole sequence
 // shares one clock (it pauses together when the tab is hidden) and needs no dependency.
 //
 // The page is server-rendered in its finished Figma state. An inline script in Hero.astro sets
@@ -22,16 +25,19 @@ export function initHeroIntro(hero: HTMLElement) {
   const progress = $('.prompt-progress');
   const bot = hero.querySelector<HTMLElement>('[data-thinking]');
   const send = $<HTMLButtonElement>('[data-prompt] button');
-  const question = typed.textContent!.trim();
+  const queries: string[] = JSON.parse(typed.dataset.queries || '[]');
+  const answer = $('[data-answer]');
+  const cta = $('[data-cta]');
+  const results = $$('[data-result]').map((el) => ({
+    el,
+    bubble: el.querySelector<HTMLElement>('[data-bubble]'),
+    count: el.querySelector<HTMLElement>('[data-count-to]'),
+    // Everything that appears after the bubble, in reading order.
+    items: [...el.querySelectorAll<HTMLElement>('.intro-hide:not([data-bubble])')],
+  }));
 
-  const parts = {
-    answer: $('[data-answer]'),
-    head: $('.answer-head'),
-    count: $('[data-count-to]'),
-    paths: $$('.path'),
-  };
-
-  let running = false;
+  let run = 0; // bumped on every restart, so a replaced run stops at its next step
+  let visible = true;
   let owned: Animation[] = [];
 
   // Waits ride the document timeline too, so typing never runs ahead of the visuals.
@@ -71,22 +77,19 @@ export function initHeroIntro(hero: HTMLElement) {
       requestAnimationFrame(tick);
     });
 
+  const showResult = (index: number) => results.forEach((r, i) => r.el.classList.toggle('is-current', i === index));
+
   const reset = () => {
     owned.forEach((a) => a.cancel());
     owned = [];
     $$('.intro-hide').forEach((el) => el.classList.remove('is-in'));
     prompt.classList.remove('is-typing', 'is-searching');
     typed.textContent = '';
-    parts.count.textContent = '0';
+    results.forEach((r) => r.count && (r.count.textContent = '0'));
+    showResult(0);
   };
 
-  const runSequence = async () => {
-    if (running) return;
-    running = true;
-    reset();
-    hero.dataset.intro = 'playing';
-
-    // 1. Type the question.
+  const typeQuestion = async (question: string) => {
     prompt.classList.add('is-typing');
     await wait(450);
     for (let i = 0; i < question.length; i++) {
@@ -95,8 +98,10 @@ export function initHeroIntro(hero: HTMLElement) {
     }
     prompt.classList.remove('is-typing');
     await wait(340);
+  };
 
-    // 2. Submit: the button presses and a thin sweep shows the search running.
+  // "Submit": the button presses and a thin sweep shows the search running.
+  const pressSend = () => {
     play(send, [{ transform: 'scale(1)' }, { transform: 'scale(0.9)', offset: 0.35 }, { transform: 'scale(1)' }], {
       duration: 340,
       easing: EASE_IN_OUT,
@@ -113,46 +118,24 @@ export function initHeroIntro(hero: HTMLElement) {
       ],
       { duration: 1100, easing: 'cubic-bezier(0.45, 0, 0.55, 1)', fill: 'none' },
     );
-    // A quick "Thinking" beat below the prompt; nothing else appears until it has gone.
-    const THINK_HOLD = 520;
-    const THINK_DELAY = 120;
-    if (bot) {
-      play(bot, thinkKeyframes(THINK_HOLD), {
-        duration: THINK_IN + THINK_HOLD + THINK_OUT,
-        delay: THINK_DELAY,
-        easing: 'linear',
-        fill: 'none',
-      });
-    }
-    await wait(THINK_DELAY + THINK_IN + THINK_HOLD + THINK_OUT);
+  };
 
-    // 3. The answer slides out from under the input (the prompt sits above it) and fades in.
-    reveal(
-      parts.answer,
-      [
-        { opacity: 0, transform: 'translateY(-36px)' },
-        { opacity: 1, transform: 'none' },
-      ],
-      { duration: 760 },
-    );
-    await wait(280);
-
-    // 4. The label and the mapped count, then the warm paths one after another.
-    reveal(parts.head, [{ opacity: 0 }, { opacity: 1 }], { duration: 480 });
-    countUp(parts.count, Number(parts.count.dataset.countTo), 1000);
-    parts.paths.forEach((row, i) =>
+  // The answer's pieces one after another; the strongest path takes its highlight last.
+  const showItems = async (r: (typeof results)[number]) => {
+    if (r.count) countUp(r.count, Number(r.count.dataset.countTo), 1000);
+    r.items.forEach((item, i) =>
       reveal(
-        row,
-        [
-          { opacity: 0, transform: 'translateY(10px)', filter: 'blur(4px)' },
-          { opacity: 1, transform: 'none', filter: 'blur(0px)' },
-        ],
-        { duration: 620, delay: 120 + i * 130 },
+        item,
+        i === 0 && !r.bubble
+          ? [{ opacity: 0 }, { opacity: 1 }]
+          : [
+              { opacity: 0, transform: 'translateY(10px)', filter: 'blur(4px)' },
+              { opacity: 1, transform: 'none', filter: 'blur(0px)' },
+            ],
+        { duration: 620, delay: i * 130 },
       ),
     );
-
-    // 5. The strongest path takes its highlight last.
-    const active = parts.paths.find((row) => row.classList.contains('active'));
+    const active = r.el.querySelector<HTMLElement>('.path.active, .mini.match');
     if (active) {
       const styles = getComputedStyle(active);
       play(
@@ -161,14 +144,130 @@ export function initHeroIntro(hero: HTMLElement) {
           { borderColor: 'rgba(29, 92, 230, 0)', boxShadow: '0 8px 24px -10px rgba(29, 92, 230, 0)' },
           { borderColor: styles.borderColor, boxShadow: styles.boxShadow },
         ],
-        { duration: 700, delay: 120 + parts.paths.length * 130 + 300 },
+        { duration: 700, delay: r.items.length * 130 + 300 },
       );
     }
-    await wait(120 + parts.paths.length * 130 + 1000);
-
-    prompt.classList.remove('is-searching');
-    running = false;
+    await wait(r.items.length * 130 + 1000);
   };
+
+  // The previous answer slides up and away under the input (the prompt sits above the card).
+  const slideAway = async (r: (typeof results)[number]) => {
+    const out = play(
+      r.el,
+      [
+        { opacity: 1, transform: 'none' },
+        { opacity: 0, transform: 'translateY(-64px)' },
+      ],
+      { duration: 480, easing: 'cubic-bezier(0.5, 0, 0.75, 0)' },
+      true,
+    );
+    await wait(480);
+    r.el.querySelectorAll('.intro-hide').forEach((el) => el.classList.remove('is-in'));
+    out.cancel();
+  };
+
+  const whenVisible = async () => {
+    while (!visible || document.hidden) await new Promise((resolve) => setTimeout(resolve, 400));
+  };
+
+  const runSequence = async () => {
+    const mine = ++run;
+    const stale = () => mine !== run;
+    reset();
+    hero.dataset.intro = 'playing';
+
+    for (let first = true; ; first = false) {
+      for (let n = 0; n < results.length; n++) {
+        const r = results[n];
+        const previous = results[(n - 1 + results.length) % results.length];
+
+        await typeQuestion(queries[n] ?? '');
+        if (stale()) return;
+        pressSend();
+
+        if (first && n === 0) {
+          // A quick "Thinking" beat below the prompt, then the card slides out from under the input.
+          const THINK_HOLD = 520;
+          const THINK_DELAY = 120;
+          if (bot) {
+            play(bot, thinkKeyframes(THINK_HOLD), {
+              duration: THINK_IN + THINK_HOLD + THINK_OUT,
+              delay: THINK_DELAY,
+              easing: 'linear',
+              fill: 'none',
+            });
+          }
+          await wait(THINK_DELAY + THINK_IN + THINK_HOLD + THINK_OUT);
+          if (stale()) return;
+          reveal(
+            answer,
+            [
+              { opacity: 0, transform: 'translateY(-36px)' },
+              { opacity: 1, transform: 'none' },
+            ],
+            { duration: 760 },
+          );
+          await wait(280);
+        } else {
+          // Chat-style: the old answer goes up under the input, and a follow-up leaves the input to
+          // become a bubble in the box. (The first question, on a loop, stays in the input.)
+          if (r.bubble) play(typed, [{ opacity: 1 }, { opacity: 0 }], { duration: 300, fill: 'none' });
+          await slideAway(previous);
+          if (stale()) return;
+          if (r.count) r.count.textContent = '0';
+          showResult(n);
+          if (r.bubble) {
+            typed.textContent = '';
+            reveal(
+              r.bubble,
+              [
+                { opacity: 0, transform: 'translateY(-22px) scale(0.96)' },
+                { opacity: 1, transform: 'none' },
+              ],
+              { duration: 460 },
+            );
+          }
+          await wait(680);
+        }
+        if (stale()) return;
+
+        await showItems(r);
+        prompt.classList.remove('is-searching');
+        if (first && n === 0) {
+          // The buttons come in once the first answer has settled. The frosted strip fades in on its
+          // own (an opacity or filter on its parent would switch the backdrop blur off until the end
+          // and make it pop in), then each button rises out of a soft blur.
+          const frost = cta.querySelector<HTMLElement>('.frost');
+          if (frost) play(frost, [{ opacity: 0 }, { opacity: 1 }], { duration: 1000, easing: 'ease-in-out' });
+          cta.querySelectorAll<HTMLElement>('.btn').forEach((btn, i) =>
+            play(
+              btn,
+              [
+                { opacity: 0, transform: 'translateY(10px)', filter: 'blur(8px)' },
+                { opacity: 1, transform: 'none', filter: 'blur(0px)' },
+              ],
+              { duration: 800, delay: 260 + i * 110 },
+            ),
+          );
+          cta.classList.add('is-in');
+          await wait(1200);
+        }
+        if (stale()) return;
+
+        // Time to read the answer before the next question; the demo waits while it is off screen.
+        await wait(n === results.length - 1 ? 4600 : 2800);
+        await whenVisible();
+        if (stale()) return;
+        // Clear the input for the next question (a follow-up already left it for its bubble).
+        if (typed.textContent) {
+          await play(typed, [{ opacity: 1 }, { opacity: 0 }], { duration: 240, fill: 'none' }).finished.catch(() => {});
+          typed.textContent = '';
+        }
+      }
+    }
+  };
+
+  new IntersectionObserver(([entry]) => (visible = entry.isIntersecting)).observe(prompt);
 
   send.addEventListener('click', runSequence);
 
