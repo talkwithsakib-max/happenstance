@@ -682,8 +682,10 @@ const queries = [first.query, filter.query, draft.query];
        light mist of the page colour so the edge of the card and the painting blend smoothly. */
     inset: -24px -160px -110px;
     background: rgba(242, 242, 242, 0.45);
-    backdrop-filter: blur(14px);
+    /* Prefixed line first: the production CSS minifier keeps only the last of the two, and
+       Chrome needs the unprefixed one (it dropped the blur on the live site before). */
     -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
     /* Full strength across the card's side edges, fading only well outside them. */
     mask-image: linear-gradient(transparent, #000 40%, #000 80%, transparent),
       linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent);
